@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Good Culture Through AI Answer Engines</title>
+<meta name="description" content="Benchmark of how ChatGPT, Gemini and Claude recommend cottage cheese brands.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: navy report band with centred serif title and tabs; light-grey page with white panels.
+   Single light theme by design (an institutional, print-like report): neutrals lean cool toward the navy. */
+:root {
+  color-scheme: light;
+  --bg: #f2f2f2;
+  --surface: #ffffff;
+  --surface-2: #eef0f2;
+  --ink: #0d1e39;
+  --ink-2: #4c4d4f;
+  --muted: #808285;
+  --line: #e1e3e6;
+  --line-strong: #c4c8cd;
+  --navy: #002d56;
+  --navy-2: #0f4e6d;
+  --sky: #6eabdd;
+  --accent: #1b75bb;
+  --accent-ink: #0f4e6d;
+  --accent-wash: #e8f1f9;
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b;
+  --good-ink: #0a6e0a; --warning-ink: #8a5d00; --critical-ink: #a32a2a;
+  --s1: #1b75bb; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+  --other: #b6b9bd; --cond: #d9dce0; --none: #eceef0;
+  --stay: #1b75bb; --mixed: #c4c8cd; --switch: #e34948;
+  --heat-0: #f1f3f5; --heat-1: #002d56;
+  --display: Georgia, "Times New Roman", Times, serif;
+  --sans: "Open Sans", Arial, Helvetica, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --r: 2px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 var(--sans); }
+a { color: var(--accent-ink); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { background: linear-gradient(100deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--navy); }
+header.top .wrap { padding-block: 40px 0; text-align: center; }
+.eyebrow { font: 500 12px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 400 clamp(28px, 4vw, 42px)/1.15 var(--display); margin: 10px 0 10px; text-wrap: balance; letter-spacing: .3px; color: #fff; }
+.sub { color: rgba(255,255,255,.82); max-width: 66ch; margin: 0 auto; font-weight: 300; font-size: 16px; }
+.toplinks { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; font-size: 13px; margin-top: 14px; color: rgba(255,255,255,.7); }
+header.top .toplinks a { color: var(--sky); }
+header.top .eyebrow { color: var(--sky); font: 400 14px/1.4 var(--display); letter-spacing: .4px; text-transform: none; }
+header.top .eyebrow .sep { opacity: .5; margin: 0 10px; }
+nav.tabs { display: flex; gap: 8px; margin-top: 28px; overflow-x: auto; justify-content: center; }
+nav.tabs a { padding: 12px 18px; text-decoration: none; color: rgba(255,255,255,.75); font: 400 17px/1 var(--display); letter-spacing: .3px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs a[aria-current="page"] { color: #fff; border-bottom-color: var(--sky); }
+nav.tabs a:hover { color: #fff; }
+nav.tabs a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, .cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main .wrap { padding-block: 28px 64px; }
+section.tab[hidden] { display: none; }
+h2 { font: 400 28px/1.2 var(--display); margin: 0 0 8px; text-wrap: balance; color: var(--navy); letter-spacing: .4px; }
+h3 { font: 600 15px/1.3 var(--sans); margin: 0 0 4px; color: var(--navy); }
+.lede { color: var(--ink-2); max-width: 68ch; margin: 0 0 16px; }
+.small { font-size: 13px; color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Findings */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 32px; }
+.kpi { background: var(--surface); border-top: 3px solid #2e8b57; border-radius: var(--r); padding: 20px 18px 16px; display: flex; flex-direction: column; position: relative; }
+.kpi.risk { border-top-color: #c0392b; }
+.kpi.risk .v { color: #a12b22; }
+.kpi .km { margin-top: auto; padding-top: 12px; font-size: 12.5px; }
+.kpi .v { font: 400 40px/1 var(--display); color: var(--navy); }
+.kpi .l { margin-top: 8px; }
+.kpi .s { margin-top: 4px; font-size: 13px; color: var(--muted); }
+.scorecard { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 12px 0 36px; }
+.dim { display: grid; grid-template-rows: auto auto 1fr; gap: 4px; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; cursor: pointer; color: inherit; font: inherit; }
+.dim:hover { border-color: var(--line-strong); }
+.dim .g { display: flex; justify-content: space-between; gap: 8px; font: 500 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.dim .n { font: 400 17px/1.25 var(--display); color: var(--navy); }
+.dim .val { font: 500 14px/1.35 var(--mono); }
+.pill { display: inline-flex; align-items: center; gap: 5px; font: 500 11px/1 var(--sans); letter-spacing: .02em; text-transform: none; padding: 3px 7px 3px 6px; border-radius: 99px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.pill i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.pill.good i { background: var(--good); } .pill.good { color: var(--good-ink); }
+.pill.warning i { background: var(--warning); } .pill.warning { color: var(--warning-ink); }
+.pill.critical i { background: var(--critical); } .pill.critical { color: var(--critical-ink); }
+.story { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 28px; padding: 28px 0; border-top: 1px solid var(--line); }
+.story p { margin: 0 0 12px; max-width: 66ch; color: var(--ink-2); }
+blockquote { margin: 0; padding: 14px 18px; background: var(--surface); border-left: 3px solid var(--sky); font: italic 400 16px/1.5 var(--display); color: var(--ink); }
+blockquote footer { margin-top: 8px; font: 400 12px/1.4 var(--sans); color: var(--muted); }
+.threats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 8px; }
+.threat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 6px; align-content: start; }
+.threat .who { display: flex; align-items: center; gap: 8px; font: 400 18px/1.2 var(--display); color: var(--navy); flex-wrap: wrap; }
+.sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex: none; }
+.threat .stat { font: 500 13px/1.3 var(--mono); color: var(--ink-2); }
+.threat q { font: italic 400 14px/1.45 var(--display); color: var(--ink-2); }
+.views { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin: 16px 0 14px; }
+.views.bottom { margin: 8px 0 36px; }
+.verdict { font: 400 21px/1.45 var(--display); color: var(--ink); max-width: 80ch; margin: 4px 0 32px; }
+.view h3 { margin: 0 0 6px; font: 600 15.5px/1.35 var(--sans); color: var(--navy); }
+.views.bottom .view p { font: 400 15px/1.6 var(--sans) !important; }
+.view { background: var(--surface); border-top: 3px solid var(--navy); border-radius: var(--r); padding: 14px 18px; }
+.view.pro { border-top-color: var(--sky); }
+.view .vh { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.view p { margin: 0 !important; color: var(--ink) !important; font-size: 14.5px; line-height: 1.55; }
+.views.bottom .view p { font: 400 16.5px/1.55 var(--display); }
+.isrc { font-size: 12.5px; color: var(--accent-ink); white-space: nowrap; }
+.fsrc { font-size: 12.5px; color: var(--muted); margin: -4px 0 10px; }
+.fsrc a { color: var(--accent-ink); }
+.fnum { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+table.fm td.fsep { font: 600 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 10px 2px 2px; background: none; }
+.readbox { background: var(--surface); border-left: 3px solid var(--navy); padding: 18px 22px; margin: 0 0 36px; }
+.readbox p { margin: 6px 0 0; font: 400 18px/1.55 var(--display); color: var(--ink); max-width: 90ch; }
+.section { margin: 0 0 12px; }
+table.bench { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 860px; font-size: 13px; background: var(--surface); }
+table.bench thead th { font-weight: 600; color: var(--navy); text-align: left; padding: 10px; border-bottom: 2px solid var(--navy); vertical-align: bottom; }
+table.bench thead th span { display: block; font-weight: 400; font-size: 11.5px; color: var(--muted); }
+table.bench tr.grp td { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 14px 10px 6px; background: var(--bg, #f3f3f3); }
+table.bench tr.brow { cursor: pointer; }
+table.bench tr.brow:hover td, table.bench tr.brow:hover th { background: #eef4fa; }
+table.bench tr.brow th { text-align: left; font-weight: 400; color: var(--ink); padding: 9px 10px; border-bottom: 1px solid var(--line); }
+table.bench tr.brow td { padding: 9px 10px; border-bottom: 1px solid var(--line); color: var(--ink-2); }
+table.bench .focal { background: #eef4fa; color: var(--navy); font-weight: 600; }
+table.bench td.nt { color: #a3a8af; font-style: italic; }
+.inv { margin: 16px 0 14px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 12px 16px; }
+.inv-h { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.inv-row { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 12px; align-items: start; padding: 6px 0; }
+.inv-row p { margin: 0 !important; color: var(--ink) !important; font-size: 14.5px; }
+.itag { font: 600 11.5px/1.3 var(--sans); padding: 4px 8px; border-radius: 4px; justify-self: start; }
+.itag.confidence { background: #e3f1e6; color: #1f6b35; } .itag.risk { background: #fbe5e3; color: #a12b22; } .itag.question { background: #e6eef7; color: var(--navy); }
+.sumgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin-top: 10px; }
+.sumcol { background: var(--surface); border-top: 3px solid; border-radius: var(--r); padding: 14px 18px; }
+.sumcol.confidence { border-color: #2e8b57; } .sumcol.risk { border-color: #c0392b; } .sumcol.question { border-color: var(--navy); }
+.sumcol h3 { margin: 0 0 8px; font: 400 18px var(--display); color: var(--navy); }
+.sumcol ul { margin: 0; padding-left: 18px; } .sumcol li { margin: 6px 0; color: var(--ink-2); font-size: 14px; }
+.trackgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.tstep { background: var(--surface); border-radius: var(--r); padding: 16px 18px; position: relative; }
+.tstep .tn { font: 400 28px/1 var(--display); color: var(--sky); }
+.tstep h3 { margin: 6px 0; font: 400 18px var(--display); color: var(--navy); }
+.tstep p { margin: 0 0 8px; color: var(--ink-2); font-size: 14px; }
+.tlinks { display: flex; flex-wrap: wrap; gap: 10px; }
+table.fm.mini td.fc { height: 52px; } table.fm.mini td.fc b { font-size: 16px; } table.fm td.own { background: #eef4fa; color: var(--navy); }
+.implications { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 8px; }
+.impl { border-top: 3px solid var(--navy); padding-top: 12px; }
+.impl p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--accent-ink); font: inherit; font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Dashboard */
+.dash { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; align-items: start; }
+.sidenav { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); display: grid; gap: 14px; font-size: 14px; }
+.sidenav .grp { font: 500 11px/1.2 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.sidenav a { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink-2); padding: 3px 0; }
+.sidenav a:hover { color: var(--ink); }
+.filterbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 0; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: var(--r); overflow: hidden; }
+.seg button { border: 0; background: var(--surface); color: var(--ink-2); font: 500 13px/1 var(--sans); padding: 8px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button[aria-pressed="true"] { background: var(--navy); color: #fff; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; margin-bottom: 20px; scroll-margin-top: 70px; }
+.panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.panel-head .q { color: var(--ink-2); margin: 2px 0 0; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.chart-title { font: 600 13px/1.3 var(--sans); margin: 0 0 8px; }
+.note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-2); margin: 6px 0 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+.stack { display: flex; height: 26px; border-radius: 4px; overflow: hidden; gap: 2px; background: var(--surface); }
+.stack div { min-width: 2px; }
+.bars { display: grid; gap: 7px; }
+.bar { display: grid; grid-template-columns: 120px minmax(0, 1fr) 54px; align-items: center; gap: 10px; font-size: 13px; }
+.bar .lab { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .track { height: 14px; background: var(--surface-2); border-radius: 0 4px 4px 0; position: relative; }
+.bar .fill { height: 100%; border-radius: 0 4px 4px 0; }
+.bar .val { font: 500 12px/1 var(--mono); text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+.pair .track { height: 9px; }
+.pair .track + .track { margin-top: 3px; }
+
+table.heat { border-collapse: separate; border-spacing: 3px; font-size: 12.5px; width: 100%; min-width: 720px; table-layout: fixed; }
+table.heat col.c-need { width: 150px; } table.heat col.c-ans { width: 64px; }
+table.heat td.cell { height: 44px; padding: 0 4px; vertical-align: middle; }
+table.heat th { font-weight: 500; color: var(--ink-2); text-align: left; padding: 4px 6px; white-space: nowrap; }
+table.heat thead th { font: 500 11px/1.25 var(--mono); letter-spacing: .03em; text-align: center; vertical-align: bottom; white-space: normal; }
+.cell { text-align: center; padding: 8px 4px; border-radius: 3px; font: 500 12px/1 var(--mono); cursor: pointer; font-variant-numeric: tabular-nums; }
+.scroll-x { overflow-x: auto; }
+table.heat th.ncol { text-align: center; }
+table.heat td.ncell { text-align: center; padding: 8px 4px; font: 500 12px/1 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px; align-items: center; font-size: 13px; }
+.div + .div { margin-top: 4px; }
+.div .lab { color: var(--ink-2); }
+.div .axis { position: relative; height: 30px; display: grid; gap: 2px; }
+.div .axis::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--line-strong); }
+.div .b { height: 8px; position: relative; }
+.div .b span { position: absolute; top: 0; height: 100%; border-radius: 2px; }
+.div-scale { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px; font: 11px/1 var(--mono); color: var(--muted); margin-top: 6px; }
+.div-scale div:last-child { display: flex; justify-content: space-between; }
+.grouplab { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 12px 0 6px; }
+
+table.data { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.data th, table.data td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+table.data th { font-weight: 500; color: var(--ink-2); font-size: 12px; }
+table.data td.r, table.data th.r { text-align: right; font-variant-numeric: tabular-nums; }
+.multiples { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 18px 24px; }
+.multiples .bar { grid-template-columns: 92px minmax(0, 1fr) 40px; }
+svg text { fill: var(--muted); font: 11px var(--mono); }
+svg .grid { stroke: var(--line); }
+svg .base { stroke: var(--line-strong); }
+
+/* Answers + drawer */
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 14px; }
+.filters label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+select, input[type="search"] { font: 14px var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r); padding: 7px 9px; min-width: 0; }
+input[type="search"] { width: min(280px, 100%); }
+.alist { display: grid; gap: 8px; }
+details.ans { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.ans summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: start; }
+details.ans summary::-webkit-details-marker { display: none; }
+details.ans .qt { font-weight: 500; }
+details.ans .meta { font-size: 12px; color: var(--muted); grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.tag { display: inline-flex; align-items: center; gap: 6px; font: 500 12px/1 var(--sans); padding: 4px 8px; border-radius: 99px; background: var(--surface-2); white-space: nowrap; }
+.ansbody { padding: 0 14px 14px; border-top: 1px solid var(--line); }
+.turn { margin-top: 12px; font-size: 13px; }
+.turn b { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
+.answer-text { white-space: pre-wrap; font-size: 14px; max-width: 80ch; overflow-wrap: anywhere; }
+.cites { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; }
+.cites a { text-decoration: none; padding: 3px 7px; border: 1px solid var(--line); border-radius: 99px; color: var(--ink-2); }
+.more { margin-top: 12px; }
+button.btn { font: 500 14px var(--sans); background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-radius: var(--r); padding: 8px 14px; cursor: pointer; }
+.drawer-bg { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 20; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(640px, 100%); background: var(--bg); z-index: 21; overflow-y: auto; padding: calc(env(safe-area-inset-top, 0px) + 18px) max(18px, env(safe-area-inset-right, 0px)) 24px 18px; border-left: 1px solid var(--line); }
+.drawer-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+.tip { position: fixed; z-index: 30; pointer-events: none; background: var(--navy); color: var(--bg); font: 12px/1.4 var(--sans); padding: 6px 9px; border-radius: 4px; max-width: 280px; }
+
+.engines { display: grid; gap: 14px; margin: 12px 0; }
+.engine { background: var(--surface); border-top: 3px solid var(--navy); padding: 16px 18px; }
+.eng-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.eng-head h3 { font: 400 22px/1.2 var(--display); margin: 0; }
+.eng-head code { font: 500 12.5px var(--mono); color: var(--ink-2); background: var(--surface-2); padding: 3px 7px; }
+.engine dl { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 4px 12px; margin: 12px 0; font-size: 14px; }
+.engine dt { font: 500 11px/1.9 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.engine dd { margin: 0; color: var(--ink-2); }
+.pc { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 24px; }
+.pc-h { font: 600 13px/1.3 var(--sans); color: var(--navy); margin-bottom: 2px; }
+.pc ul { margin: 0; padding-left: 18px; font-size: 14px; }
+.pc li { margin: 3px 0; }
+.engine .src { margin-top: 10px; font-size: 12px; color: var(--muted); }
+/* Method */
+.prose { max-width: 980px; margin: 0 auto; }
+.narrow { max-width: 980px; margin: 0 auto; }
+.lede.wide { max-width: none; }
+.prose h2 { margin-top: 36px; }
+.prose p, .prose li { color: var(--ink-2); }
+.flow { list-style: none; counter-reset: step; display: grid; grid-template-columns: repeat(auto-fit, minmax(124px, 1fr)); gap: 8px; padding: 0; margin: 14px 0 20px; }
+.flow li { counter-increment: step; background: var(--surface); border-top: 3px solid var(--navy); padding: 12px 12px 14px; display: grid; gap: 4px; align-content: start; position: relative; }
+.flow li::before { content: counter(step); font: 400 22px/1 var(--display); color: var(--sky); }
+.flow .fs { font: 400 15px/1.25 var(--display); color: var(--navy); }
+.flow .fd { font-size: 12px; line-height: 1.45; color: var(--ink-2); }
+.sub-h { font: 400 19px/1.3 var(--display); margin: 22px 0 6px; }
+dl.defs { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px 14px; margin: 8px 0 14px; }
+dl.defs dt { font: 500 11px/1.9 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+dl.defs dd { margin: 0; color: var(--ink-2); }
+ul.tight { margin: 4px 0 0; padding-left: 18px; }
+.rrow { display: grid; grid-template-columns: 290px minmax(0, 560px); gap: 10px; align-items: center; font-size: 13px; padding: 3px 0; }
+.rrow .lab { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rbars { display: grid; gap: 3px; }
+.rbar { display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 8px; align-items: center; }
+.rtrack { position: relative; height: 9px; background: var(--surface-2); border-radius: 0 3px 3px 0; display: block; }
+.rfill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 3px 3px 0; }
+.rref { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); opacity: .55; }
+.rval { font: 500 11.5px/1 var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.ref-key { display: inline-block; width: 2px; height: 12px; background: var(--ink); opacity: .55; }
+.rscale { display: grid; grid-template-columns: 290px minmax(0, 560px); gap: 10px; font: 11px/1 var(--mono); color: var(--muted); margin-top: 6px; }
+.rscale div { display: flex; justify-content: space-between; margin-right: 48px; }
+@media (max-width: 860px) { .rrow, .rscale { grid-template-columns: 130px minmax(0, 1fr); } .rrow .lab { white-space: normal; } }
+.story .rrow, .story .rscale { grid-template-columns: 92px minmax(0, 1fr); }
+.story .rrow .lab { white-space: normal; }
+.what { display: grid; gap: 6px; background: var(--surface-2); border-left: 3px solid var(--sky); padding: 10px 14px; margin: 4px 0 12px; font-size: 13.5px; color: var(--ink-2); max-width: 900px; }
+.what-k { display: block; font: 500 10.5px/1.6 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.result { margin: 0 0 18px; max-width: 900px; color: var(--ink); }
+table.dest { table-layout: fixed; min-width: 560px; }
+table.dest td { vertical-align: middle; }
+table.dest .dlab { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+table.loy { table-layout: fixed; min-width: 640px; }
+table.loy td { padding-right: 18px; }
+.rivals { margin: 2px 0 12px; max-width: 900px; }
+table.rv { border-collapse: collapse; width: auto; font-size: 13.5px; }
+table.rv th { text-align: left; font-weight: 600; color: var(--navy); padding: 3px 18px 3px 0; white-space: nowrap; }
+table.rv td { padding: 3px 0; color: var(--ink-2); }
+ul.why { list-style: none; padding: 0; margin: 2px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2px 20px; }
+table.h2h { table-layout: fixed; min-width: 640px; }
+table.h2h td { vertical-align: middle; }
+.pgroup { margin-bottom: 14px; }
+.prow { display: grid; grid-template-columns: 290px minmax(0, 560px) 48px; gap: 10px; align-items: center; font-size: 13px; padding: 4px 0; }
+.prow .lab { color: var(--ink-2); }
+.prow .rtrack { height: 12px; }
+.realtag { font: 500 10.5px/1 var(--sans); color: var(--navy); background: var(--accent-wash); padding: 2px 6px; border-radius: 99px; margin-left: 4px; white-space: nowrap; }
+.pscale { grid-template-columns: 290px minmax(0, 560px) 48px; }
+.pscale div { margin-right: 0; }
+@media (max-width: 860px) { .prow, .pscale { grid-template-columns: 130px minmax(0, 1fr) 40px; } }
+.ppanels { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px 32px; margin-top: 4px; }
+.ring-key { display: inline-block; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--accent); }
+.dash-key { display: inline-block; width: 16px; border-top: 2px dashed var(--muted); }
+.scards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 6px 0 4px; }
+.scard { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--line-strong); padding: 12px; display: grid; gap: 4px; align-content: start; }
+.sname { font: 400 17px/1.2 var(--display); color: var(--navy); }
+.sbig { font: 400 30px/1 var(--display); color: var(--ink); margin-top: 4px; }
+.scard .stack { height: 10px; margin-top: 6px; }
+ .rline { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-top: 8px; flex-wrap: wrap; }
+.rq { font: 500 10.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); width: 100%; }
+ul.tkey { list-style: none; padding: 0; margin: 8px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 2px 14px; font-size: 12.5px; color: var(--ink-2); }
+ul.tkey .sw { margin-right: 6px; }
+.ptools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 8px; }
+.srcg { font: 600 15px var(--sans); color: var(--navy); margin: 16px 0 6px; }
+.srclist { margin: 0 0 8px; padding-left: 22px; } .srclist li { margin: 5px 0; font-size: 14.5px; }
+table.data.tools { table-layout: fixed; min-width: 640px; }
+table.data.tools td { vertical-align: top; }
+table.srcmix { table-layout: fixed; min-width: 560px; }
+table.hm, table.fm { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 3px; font-size: 12.5px; }
+table.hm th, table.fm th { font-weight: 600; color: var(--ink-2); text-align: center; padding: 2px; font-size: 12px; }
+table.hm th:first-child, table.fm th:first-child { text-align: left; }
+table.hm td.hs .sw, table.hm td.hs > span:first-child { margin-right: 7px; }
+table.hm td.hs { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+table.hm td.hc { height: 26px; text-align: center; border-radius: 4px; background: #f1f3f5; color: var(--ink-2); font-family: var(--mono); font-size: 12px; }
+table.hm td.hc.dk { color: #fff; }
+table.fm td.ff { color: var(--ink); line-height: 1.3; }
+table.fm td.ff span { display: block; font-size: 11.5px; color: var(--ink-3, #8a8f98); }
+table.fm td.fc { height: 70px; text-align: center; border-radius: 6px; font-size: 12px; }
+table.fm td.fc b { display: block; font: 600 19px var(--mono); }
+table.fm td.ok { background: #e3f1e6; color: #1f6b35; }
+table.fm td.bad { background: #fbe5e3; color: #a12b22; }
+table.fm td.na { background: #f1f3f5; color: #8a8f98; }
+table.srcmix td { vertical-align: middle; }
+.frow { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); align-items: start; }
+.feng { font-weight: 600; color: var(--navy); font-size: 13px; padding-top: 2px; }
+.fbars { display: grid; gap: 5px; }
+.fbar { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 4px 8px; align-items: center; font-size: 12.5px; }
+.flab { color: var(--ink-2); }
+.fbar .rtrack { height: 9px; }
+.fval { grid-column: 2; font: 500 11.5px/1.2 var(--mono); color: var(--ink); }
+.formula { margin: 8px 0 0; padding: 8px 12px; background: var(--surface); border-left: 3px solid var(--navy); font: 400 14px/1.45 var(--display); color: var(--ink); }
+.mlink { font-size: 12px; font-weight: 400; white-space: nowrap; }
+.flash { background: var(--accent-wash); transition: background .4s; }
+.also { margin-top: 4px; font-size: 12.5px; font-style: italic; color: #6b6e72; }
+ul.tight li { margin: 2px 0; }
+table.grid-ex td { font-size: 13px; color: var(--ink-2); }
+table.grid-ex th { white-space: nowrap; }
+pre { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; overflow-x: auto; font: 12.5px/1.5 var(--mono); }
+
+@media (max-width: 860px) {
+  .scorecard { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  .dash { grid-template-columns: minmax(0, 1fr); }
+  .sidenav { display: none; }
+  .story { grid-template-columns: minmax(0, 1fr); }
+  .bar { grid-template-columns: 96px minmax(0, 1fr) 48px; }
+  .div, .div-scale { grid-template-columns: 110px minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) { .fill, .stack div { transition: width .25s ease; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1 id="title"></h1>
+    <p class="sub" id="subtitle"></p>
+    <div class="toplinks small" id="toplinks"></div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#findings" data-tab="findings">Findings</a>
+      <a href="#dashboard" data-tab="dashboard">Dashboard</a>
+      <a href="#method" data-tab="method">Method</a>
+      <a href="#log" data-tab="log">Prompt-Response Log</a>
+      <a href="#tools" data-tab="tools">Appendix</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <section class="tab" id="tab-findings"></section>
+    <section class="tab" id="tab-dashboard" hidden></section>
+    <section class="tab" id="tab-method" hidden></section>
+    <section class="tab" id="tab-tools" hidden></section>
+    <section class="tab" id="tab-log" hidden></section>
+  </div>
+</main>
+<div class="tip" id="tip" hidden></div>
+<script>
+const D = /*__DATA__*/null;
+const F = D.findings;
+const ROWS = D.rows;
+const ENGINES = D.meta.engines;                       // {openai: "ChatGPT", ...}
+const FOCAL = D.meta.focal_brand;
+const NEEDS = {neutral: "General", cooking: "Cooking", taste_texture: "Taste & texture", low_calorie: "Low calorie",
+  clean_ingredients: "Clean ingredients", lactose_free: "Lactose-free", protein: "Protein", value: "Value", low_sodium: "Low sodium"};
+const MODULES = {m1: "M1 need journey", m3_seeded: "M3 pushback", pilot_loyalty: "Loyalty", pilot_h2h: "Head-to-head",
+  pilot_h2h_more: "Head-to-head", pilot_m2: "Two-step", pilot_m5: "Price", pilot_mulu_price: "Price",
+  pilot_region: "Regions", pilot_need: "Need scan", extra: "Other needs"};
+const modLabel = r => r.m === "extra" ? (r.pid && r.pid in (F.retailers || {}) ? "Retailer" : "Other needs") : (MODULES[r.m] || r.m);
+const BRAND_COLOR = {}; D.brands.forEach((b, i) => BRAND_COLOR[b] = `var(--s${i + 1})`);
+const color = b => BRAND_COLOR[b] || (b === "conditional" ? "var(--cond)" : b === "none" || b === "refusal" ? "var(--none)" : "var(--other)");
+const label = b => b === "conditional" ? "It depends" : b === "none" ? "No pick" : b === "refusal" ? "Refused" : b;
+const pct = (x, d = 0) => x == null || isNaN(x) ? "–" : (x * 100).toFixed(d) + "%";
+const pts = x => x == null || isNaN(x) ? "–" : (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(Math.round(x * 100));
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const $ = (s, el = document) => el.querySelector(s);
+const state = {engine: "all"};
+const byEngine = r => state.engine === "all" || r.e === state.engine;
+const countBy = (rows, f) => rows.reduce((m, r) => { const k = f(r); m[k] = (m[k] || 0) + 1; return m; }, {});
+const swatch = c => `<i class="sw" style="background:${c}"></i>`;
+
+/* ---------- shared chart pieces (HTML bars; SVG only for the price line) ---------- */
+function stackBar(counts, n, order) {
+  const keys = order || Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  return `<div class="stack" role="img" aria-label="${keys.map(k => label(k) + " " + pct(counts[k] / n)).join(", ")}">` +
+    keys.filter(k => counts[k]).map(k => `<div style="width:${counts[k] / n * 100}%;background:${color(k)}" data-tip="${esc(label(k))}: ${pct(counts[k] / n)} (${counts[k]} of ${n})"></div>`).join("") + `</div>`;
+}
+function legend(keys) { return `<div class="legend">${keys.map(k => `<span>${swatch(color(k))}${esc(label(k))}</span>`).join("")}</div>`; }
+function bars(items, max, fmt = pct) {
+  max = max || Math.max(...items.map(i => i.v), 0.0001);
+  return `<div class="bars">${items.map(i => `<div class="bar" data-tip="${esc(i.tip || (i.l + ": " + fmt(i.v)))}">
+    <span class="lab">${esc(i.l)}</span><span class="track"><span class="fill" style="display:block;width:${Math.max(0, i.v) / max * 100}%;background:${i.c || "var(--accent)"}"></span></span>
+    <span class="val">${fmt(i.v)}</span></div>`).join("")}</div>`;
+}
+function topMix(rows) { const c = countBy(rows, r => r.top); return {c, n: rows.length}; }
+
+/* ---------- header + tabs ---------- */
+$("#eyebrow").innerHTML = (F.eyebrow || ["AI Answer-Engine Benchmark", F.asof]).map(esc).join('<span class="sep">|</span>');
+$("#title").textContent = F.title;
+$("#subtitle").textContent = F.subtitle;
+$("#toplinks").innerHTML = `<span>${D.meta.answers.toLocaleString()} prompt-response pairs from the free-tier models of ChatGPT, Gemini and Claude, with web search on</span>
+  <a href="https://github.com/chloeeyuu/Cottage-Cheese-Case" target="_blank" rel="noopener">GitHub</a>`;
+const TABS = ["findings", "dashboard", "method", "log", "tools"];
+const rendered = {};
+function showTab(t) {
+  if (!TABS.includes(t)) t = "findings";
+  TABS.forEach(x => { $("#tab-" + x).hidden = x !== t; });
+  document.querySelectorAll("nav.tabs a").forEach(a => a.dataset.tab === t ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  if (!rendered[t]) { ({findings: renderFindings, dashboard: renderDashboard, method: renderMethod, tools: renderTools, log: renderAnswers})[t](); rendered[t] = true; }
+}
+window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (TABS.includes(h)) showTab(h); });
+function goDim(id) { location.hash = "dashboard"; showTab("dashboard"); setTimeout(() => document.getElementById("dim-" + id)?.scrollIntoView({behavior: "smooth", block: "start"}), 30); }
+
+/* ---------- pushback retention bars (0-100%, with the no-pushback level as a reference tick) ---------- */
+function retentionBars(m3, seeds, items) {
+  const ret = (fu, sd) => { const rs = m3.filter(r => r.fu2 === fu && r.seed === sd); return rs.length ? [rs.filter(r => r.top === sd).length, rs.length] : [0, 0]; };
+  const base = Object.fromEntries(seeds.map(sd => { const [k, n] = ret("placebo", sd); return [sd, n ? k / n : NaN]; }));
+  const name = sd => sd === "Private label" ? "Kirkland" : sd;
+  return `<div class="legend">${seeds.map(sd => `<span>${swatch(color(sd))}${esc(name(sd))}</span>`).join("")}<span><i class="ref-key"></i>Retention with no pushback</span></div>` +
+    items.map(([fu, lab]) => `<div class="rrow"><span class="lab">${lab}</span><div class="rbars">${seeds.map(sd => { const [k, n] = ret(fu, sd), v = n ? k / n : 0;
+      return `<div class="rbar" data-tip="${esc(name(sd))}: ${k} of ${n} still recommended (${pct(v)}). With no pushback: ${pct(base[sd])}">
+        <span class="rtrack"><span class="rfill" style="width:${v * 100}%;background:${color(sd)}"></span><span class="rref" style="left:${base[sd] * 100}%"></span></span><span class="rval">${pct(v)}</span></div>`; }).join("")}</div></div>`).join("") +
+    `<div class="rscale"><span></span><div><span>0%</span><span>50%</span><span>100%</span></div></div>`;
+}
+
+/* ---------- metric definitions: inline links to the Method page ---------- */
+const mlink = id => `<a href="#method" class="mlink" data-metric="${id}">How it's calculated</a>`;
+document.addEventListener("click", e => {
+  const a = e.target.closest("a.mlink"); if (!a) return;
+  e.preventDefault(); closeDrawer(); location.hash = "method"; showTab("method");
+  const el = document.getElementById("metric-" + a.dataset.metric);
+  if (el) { el.scrollIntoView({behavior: "smooth", block: "center"}); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1600); }
+});
+function pushbackFormula() {
+  const m3 = ROWS.filter(r => r.m === "m3_seeded" && r.seed === FOCAL);
+  const a = m3.filter(r => r.fu === "price"), b = m3.filter(r => r.fu === "placebo");
+  const ka = a.filter(r => r.top === FOCAL).length, kb = b.filter(r => r.top === FOCAL).length;
+  const ex = a.length && b.length ? `<div class="small" style="margin-top:6px">Example: after recommending ${esc(FOCAL)}, the consumer asks “What if I'm on a tight budget?”. ${ka} of ${a.length} conversations still recommend ${esc(FOCAL)}, so pushback retention is <b>${pct(ka / a.length)}</b>. For reference, with no pushback (“Thanks, anything else I should know?”) it is ${pct(kb / b.length)} (${kb} of ${b.length}).</div>` : "";
+  return `<div class="formula">Pushback retention = conversations still recommending the brand after the follow-up ÷ all conversations with that follow-up</div>${ex}
+    <div class="small" style="margin-top:4px">The no-pushback level is shown as a reference line in the charts, because engines sometimes switch brands even when nothing changes (Kirkland keeps only 56% with no pushback).</div>`;
+}
+
+/* ---------- Findings ---------- */
+const STATUS = {good: "Strong", warning: "Mixed", critical: "Exposed"};
+function pill(s) { return `<span class="pill ${s}"><i></i>${STATUS[s]}</span>`; }
+const M1ALL = () => ROWS.filter(r => r.m === "m1" && r.stage !== "category");
+const MINI = {
+  wins: () => { const m1 = M1ALL();
+    const items = Object.keys(NEEDS).map(nd => { const rs = m1.filter(r => r.need === nd), c = countBy(rs, r => r.top);
+      const lead = Object.keys(c).filter(k => !["conditional", "none"].includes(k)).sort((a, b) => c[b] - c[a])[0] || "none";
+      return {l: NEEDS[nd], v: (c[lead] || 0) / rs.length, c: color(lead), tip: `${NEEDS[nd]}: ${lead} is top pick in ${c[lead] || 0} of ${rs.length}`, lead}; })
+      .sort((a, b) => (b.lead === FOCAL) - (a.lead === FOCAL) || b.v - a.v);
+    const leads = [...new Set(items.map(i => i.lead))];
+    return `<div class="chart-title">Leading brand per consumer need (share of answers, all engines)</div>${legend(leads)}${bars(items, 1)}`; },
+  holds: () => { const m3 = ROWS.filter(r => r.m === "m3_seeded").map(r => ({...r, fu2: r.fu}));
+    return `<div class="chart-title">Pushback retention: share still recommending the brand ${mlink("pushback")}</div>` +
+      retentionBars(m3, [FOCAL, "Daisy", "Private label"], [["competitor", "Named rival"], ["retailer_walmart", "Walmart (example store)"], ["price", "Tight budget"], ["protein", "Most protein"]]); },
+  pillars: () => { const m1 = M1ALL(), share = (rs, b) => rs.length ? rs.filter(r => r.top === b).length / rs.length : 0;
+    const P = [["High protein", "protein", "Mulu", null], ["Simple ingredients", "clean_ingredients", "Daisy", "openai"], ["Live cultures", "live_cultures", "Nancy's", "openai"]];
+    const rows = P.map(([pl, nd, rv, e]) => { const src = nd === "live_cultures" ? ROWS.filter(r => (r.m === "extra" || r.m === "pilot_need") && r.need === nd) : m1;
+      const rs = src.filter(r => r.need === nd && (!e || r.e === e));
+      return `<tr><td class="ff">${pl}<span>${e ? ENGINES[e] + ", " : ""}${rs.length} answers</span></td><td class="fc bad"><b>${pct(share(rs, rv))}</b>${esc(rv)}</td><td class="fc ${share(rs, FOCAL) >= share(rs, rv) ? "ok" : "na"}"><b>${pct(share(rs, FOCAL))}</b>${esc(FOCAL)}</td></tr>`; }).join("");
+    const keep = [["taste_texture", "Taste & texture"], ["cooking", "Cooking"], ["neutral", "Everyday use"]].map(([nd, l]) => { const rs = m1.filter(r => r.need === nd);
+      return `<tr><td class="ff">${l}<span>all engines</span></td><td class="fc na"><b>–</b></td><td class="fc ok"><b>${pct(share(rs, FOCAL))}</b>${esc(FOCAL)}</td></tr>`; }).join("");
+    return `<div class="chart-title">Top-pick share on each selling point</div>
+      <table class="fm mini"><thead><tr><th></th><th>Challenger</th><th>${esc(FOCAL)}</th></tr></thead><tbody>${rows}
+      <tr><td colspan="3" class="fsep">Where ${esc(FOCAL)} wins outright</td></tr>${keep}</tbody></table>`; },
+  why: () => { const eng = Object.keys(ENGINES), fx = D.facts, lab = fx.label;
+    const own = eng.map(e => { const rs = M1ALL().filter(r => r.e === e); return rs.filter(r => r.c.some(x => x[1] === "owned_focal")).length / rs.length; });
+    const cell = (e, k, unit, truth) => { const x = (fx.by_engine[e] || {})[k]; if (!x || !x.n) return `<td class="fc na"><b>–</b>not stated</td>`;
+      const v = x.match_label / x.n, top1 = Object.entries(x.values).sort((p, q) => q[1] - p[1])[0];
+      return `<td class="fc ${v >= 0.5 ? "ok" : "bad"}"><b>${pct(v)}</b>${v >= 0.5 ? "right" : "says " + top1[0] + unit}</td>`; };
+    return `<div class="chart-title">Does the AI read the brand's site, and get the label right?</div>
+      <table class="fm mini"><thead><tr><th></th>${eng.map(e => `<th>${esc(ENGINES[e])}</th>`).join("")}</tr></thead><tbody>
+      <tr><td class="ff">Cites ${esc(FOCAL)}'s site<span>brand questions</span></td>${own.map(v => `<td class="fc own"><b>${pct(v)}</b></td>`).join("")}</tr>
+      <tr><td class="ff">Calories<span>label ${lab.calories} kcal</span></td>${eng.map(e => cell(e, "calories", " kcal", lab.calories)).join("")}</tr>
+      <tr><td class="ff">Sodium<span>label ${lab.sodium} mg</span></td>${eng.map(e => cell(e, "sodium", " mg", lab.sodium)).join("")}</tr></tbody></table>`; }
+};
+const INV = {confidence: "Reason for confidence", risk: "Risk to diligence", question: "Question for management"};
+function invest(list) { return list && list.length ? `<div class="inv"><div class="inv-h">For the investment case</div>${list.map(i => `<div class="inv-row"><span class="itag ${i.type}">${INV[i.type]}</span><p>${esc(i.text)}</p></div>`).join("")}</div>` : ""; }
+function renderFindings() {
+  const view = f => `<div class="views"><div class="view own"><div class="vh">For an existing investor</div>${f.existing_h ? `<h3>${esc(f.existing_h)}</h3>` : ""}<p>${esc(f.existing)}</p></div><div class="view pro"><div class="vh">For a prospective investor</div>${f.prospective_h ? `<h3>${esc(f.prospective_h)}</h3>` : ""}<p>${esc(f.prospective)}${f.prospective_src ? ` <a class="isrc" href="${esc(f.prospective_src[1])}" target="_blank" rel="noopener">(Source: ${esc(f.prospective_src[0])})</a>` : ""}</p></div></div>`;
+  const tr = F.track, bt = F.bottom;
+  const track = tr ? `<div class="story"><div style="grid-column:1/-1"><h2>What to Track Each Quarter</h2><p class="lede">${esc(tr.intro)}</p>
+      <div class="trackgrid">${tr.steps.map((s, i) => `<div class="tstep"><div class="tn">${i + 1}</div><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p><div class="tlinks">${s.dims.map(dm => `<button class="linkbtn" data-dim="${dm}">${esc((F.dimensions.find(x => x.id === dm) || {}).name || dm)}</button>`).join("")}</div></div>`).join("")}</div></div></div>` : "";
+  $("#tab-findings").innerHTML = `
+    <div class="kpis">${F.kpis.map(k => `<div class="kpi${k.risk ? " risk" : ""}"><div class="v">${esc(k.value)}</div><div class="l">${esc(k.label)}</div><div class="s">${esc(k.sub)}</div></div>`).join("")}</div>
+    ${bt ? `${bt.verdict ? `<p class="verdict">${esc(bt.verdict)}</p>` : ""}` : ""}
+    ${F.findings.map((f, i) => `<div class="story"><div><div class="fnum">Finding ${i + 1}</div><h2>${esc(f.title)}</h2><p>${esc(f.body)}</p>${f.sources ? `<div class="fsrc">Sources: ${f.sources.map(([l, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(l)}</a>`).join(", ")}</div>` : ""}
+      ${f.quote ? `<blockquote style="margin:14px 0">“${esc(f.quote.text)}”<footer>${esc(f.quote.who)}</footer></blockquote>` : ""}
+      ${view(f)}<button class="linkbtn" data-dim="${f.dim}">See the data in the dashboard</button></div>
+      <div>${MINI[f.id] ? MINI[f.id]() : ""}</div></div>`).join("")}
+
+    ${bt ? `<div class="story"><div style="grid-column:1/-1"><h2>Bottom Line</h2><div class="views bottom"><div class="view own"><div class="vh">For an existing investor</div>${bt.existing_h ? `<h3>${esc(bt.existing_h)}</h3>` : ""}<p>${esc(bt.existing)}</p></div><div class="view pro"><div class="vh">For a prospective investor</div>${bt.prospective_h ? `<h3>${esc(bt.prospective_h)}</h3>` : ""}<p>${esc(bt.prospective)}</p></div></div></div></div>` : ""}`;
+  $("#tab-findings").querySelectorAll("[data-dim]").forEach(b => b.addEventListener("click", () => goDim(b.dataset.dim)));
+}
+
+/* ---------- Dashboard ---------- */
+const DIM_RENDER = {};
+function renderDashboard() {
+  const groups = [...new Set(F.dimensions.map(d => d.group))];
+  $("#tab-dashboard").innerHTML = `<div class="dash">
+    <nav class="sidenav" aria-label="Measures">${groups.map(g => `<div><div class="grp">${esc(g)}</div>${F.dimensions.filter(d => d.group === g)
+      .map(d => `<a href="#dashboard" data-dim="${d.id}"><span class="pill ${d.status}" style="padding:3px"><i></i></span>${esc(d.name)}</a>`).join("")}</div>`).join("")}</nav>
+    <div><div class="filterbar"><span class="small">Engine</span><div class="seg" role="group" aria-label="Engine">
+      ${[["all", "All three"], ...Object.entries(ENGINES)].map(([k, v]) => `<button data-engine="${k}" aria-pressed="${k === state.engine}">${v}</button>`).join("")}</div>
+      <span class="small">Top pick = an explicit recommendation. "It depends" answers credit no brand.</span></div>
+      ${F.dimensions.map(d => `<div class="panel" id="dim-${d.id}"><div class="panel-head"><div><div class="eyebrow">${esc(d.group)}</div><h2>${esc(d.name)}</h2>
+        <p class="q">${esc(d.question)}</p></div>${pill(d.status)}</div>${d.id === "h2h" && F.rival_why ? `<div class="rivals"><div class="what-k">Rivals tested</div><table class="rv"><tbody>${F.rival_why.map(([r, w]) => `<tr><th>${esc(r)}</th><td>${esc(w)}</td></tr>`).join("")}</tbody></table></div>` : ""}${d.measures ? `<div class="what"><div><span class="what-k">What this measures</span>${esc(d.measures)}</div><div><span class="what-k">How it was tested</span>${esc(d.how)}${d.metric ? " " + mlink(d.metric) : ""}</div></div>` : ""}<p class="result"><span class="what-k">Result</span>${esc(d.note)}</p><div class="body"></div></div>`).join("")}
+    </div></div>`;
+  $("#tab-dashboard").querySelectorAll(".sidenav a").forEach(a => a.addEventListener("click", e => { e.preventDefault(); document.getElementById("dim-" + a.dataset.dim).scrollIntoView({behavior: "smooth"}); }));
+  $("#tab-dashboard").querySelectorAll("[data-engine]").forEach(b => b.addEventListener("click", () => {
+    state.engine = b.dataset.engine;
+    $("#tab-dashboard").querySelectorAll("[data-engine]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    drawDims();
+  }));
+  drawDims();
+}
+function drawDims() { F.dimensions.forEach(d => { const el = $(`#dim-${d.id} .body`); if (el && DIM_RENDER[d.id]) el.innerHTML = DIM_RENDER[d.id](); }); bindCells(); }
+const engineNote = () => state.engine === "all" ? "all three engines" : ENGINES[state.engine];
+
+DIM_RENDER.default = () => {
+  const m1 = ROWS.filter(r => r.m === "m1" && r.stage !== "category" && byEngine(r));
+  const {c, n} = topMix(m1);
+  const c2 = {}; Object.entries(c).forEach(([k, v]) => { const g = D.brands.includes(k) || ["conditional", "none", "refusal"].includes(k) ? k : "Other"; c2[g] = (c2[g] || 0) + v; });
+  const order = Object.keys(c2).filter(k => !["conditional", "none", "refusal", "Other"].includes(k)).sort((a, b) => c2[b] - c2[a]).concat(["Other", "conditional", "none"]);
+  const otherNames = Object.keys(c).filter(k => !D.brands.includes(k) && !["conditional", "none", "refusal"].includes(k));
+  // over-index: AI top-pick share of each sales group vs its dollar share
+  const grp = {}; Object.entries(c).forEach(([b, k]) => { const g = D.oi_group[b]; if (g) grp[g] = (grp[g] || 0) + k / n; });
+  const ds = D.meta.dollar_share;
+  const oiRows = Object.keys(ds).filter(g => g !== "Kemps").sort((a, b) => ds[b] - ds[a]).map(g => {
+    const ai = grp[g] || 0, s = ds[g];
+    return `<div class="bar pair" data-tip="${esc(g)}: ${pct(ai)} of AI top picks vs. ${pct(s)} of dollar sales = ${(ai / s).toFixed(1)}×">
+      <span class="lab">${esc(g)}</span><span><span class="track" style="display:block"><span class="fill" style="display:block;width:${ai / 0.6 * 100}%;background:${color(g === "Lactalis" ? "Breakstone's" : g)}"></span></span>
+      <span class="track" style="display:block"><span class="fill" style="display:block;width:${s / 0.6 * 100}%;background:var(--line-strong)"></span></span></span>
+      <span class="val">${(ai / s).toFixed(1)}×</span></div>`; }).join("");
+  const mention = D.brands.map(b => ({l: b, v: m1.filter(r => r.b[b]).length / n, c: color(b)})).sort((a, b) => b.v - a.v);
+  const m2 = ROWS.filter(r => r.m === "pilot_m2" && byEngine(r)), m2c = countBy(m2, r => r.top);
+  return `<div class="chart-title">Top pick in brand and purchase questions (${n} answers, ${engineNote()})</div>
+    ${stackBar(c2, n, order)}${legend(order.filter(k => c2[k]))}${otherNames.length ? `<div class="note" style="margin-top:0">Other: ${esc(otherNames.join(", "))}.</div>` : ""}
+    <div class="grid2" style="margin-top:18px">
+      <div><div class="chart-title">AI top-pick share vs. dollar-sales share ${mlink("oi")}</div>
+        <div class="legend"><span>${swatch("var(--accent)")}AI top picks (brand colour)</span><span>${swatch("var(--line-strong)")}Dollar sales</span></div>
+        <div class="bars">${oiRows}</div><div class="note">Ratio = over-index. Lactalis = Breakstone's + Knudsen. Sales: Circana data, ${esc(D.meta.sales_source?.period || "")}, via <a href="${esc(D.meta.sales_source?.url || "#")}" target="_blank" rel="noopener">Dairy Foods (May 2026)</a>.</div></div>
+      <div><div class="chart-title">Named anywhere in the answer</div><div class="note" style="margin:-4px 0 8px">Share of answers that mention the brand at least once, whether as the top pick, an alternative or a brand to avoid.</div>${bars(mention, 1)}</div>
+    </div>
+    <div style="margin-top:18px"><div class="chart-title">Two-step journey: category question first, then "Which brand should I buy?" (${m2.length} answers)</div>
+      ${m2.length ? stackBar(m2c, m2.length) + legend(Object.keys(m2c).sort((a, b) => m2c[b] - m2c[a])) : `<p class="small">No answers for this engine.</p>`}</div>`;
+};
+
+DIM_RENDER.needs = () => {
+  const m1 = ROWS.filter(r => r.m === "m1" && r.stage !== "category" && byEngine(r));
+  const cols = ["Good Culture", "Daisy", "Private label", "Mulu", "Friendship", "Lactaid", "conditional", "none"];
+  const needs = Object.keys(NEEDS);
+  const head = `<tr><th></th>${cols.map(c => `<th>${swatch(color(c))}<br>${esc(label(c))}</th>`).join("")}<th class="ncol">Answers</th></tr>`;
+  const body = needs.map(nd => {
+    const rs = m1.filter(r => r.need === nd), n = rs.length, cc = countBy(rs, r => r.top);
+    const lead = Object.keys(cc).filter(k => !["conditional", "none"].includes(k)).sort((a, b) => cc[b] - cc[a])[0];
+    return `<tr><th>${esc(NEEDS[nd])}${lead ? `<div class="small">${esc(lead)} leads</div>` : ""}</th>${cols.map(c => {
+      const v = n ? (cc[c] || 0) / n : 0;
+      const bg = `color-mix(in oklab, var(--heat-1) ${Math.round(v * 100)}%, var(--heat-0))`;
+      return `<td class="cell" tabindex="0" role="button" data-need="${nd}" data-top="${c}" style="background:${bg};color:${v > .45 ? "#fff" : "var(--ink)"}"
+        data-tip="${esc(NEEDS[nd])} · ${esc(label(c))}: ${cc[c] || 0} of ${n}. Click to read them.">${v ? pct(v) : "·"}</td>`; }).join("")}<td class="ncell">${n}</td></tr>`;
+  }).join("");
+  return `<div class="chart-title">Top-pick share by consumer need (${engineNote()}) · click a cell to read the answers</div>
+    <div class="scroll-x"><table class="heat"><colgroup><col class="c-need">${cols.map(() => "<col>").join("")}<col class="c-ans"></colgroup><thead>${head}</thead><tbody>${body}</tbody></table></div>
+    <div class="note">Each need has 6 brand- and purchase-stage questions × 2 repeats per engine. Category-stage questions ("Is cottage cheese healthy?") are excluded because they rarely name a brand.</div>`;
+};
+function bindCells() {
+  document.querySelectorAll("#dim-needs .cell").forEach(td => {
+    const open = () => openDrawer(`${NEEDS[td.dataset.need]} → ${label(td.dataset.top)}`,
+      ROWS.filter(r => r.m === "m1" && r.stage !== "category" && byEngine(r) && r.need === td.dataset.need && r.top === td.dataset.top));
+    td.addEventListener("click", open); td.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+  });
+}
+
+const FU = [["Control", [["placebo", "“Thanks, anything else?” (no pushback)"], ["competitor", "“Would you still pick it over [rival]?”"]]],
+  ["Preference shift", [["price", "“What if I'm on a tight budget?”"], ["protein", "“I want the most protein possible.”"], ["taste", "“What if texture matters most?”"]]],
+  ["Distribution", [["retailer_walmart", "“I shop at Walmart”"], ["retailer_costco", "“I shop at Costco”"], ["retailer_kroger", "“I shop at Kroger”"], ["region", "“I live in [region]” (5 regions)"]]]];
+DIM_RENDER.pushback = () => {
+  const m3 = ROWS.filter(r => r.m === "m3_seeded" && byEngine(r)).map(r => ({...r, fu2: r.fu.startsWith("region") ? "region" : r.fu}));
+  const seeds = [...new Set(m3.map(r => r.seed))].sort((a, b) => a === FOCAL ? -1 : b === FOCAL ? 1 : a.localeCompare(b));
+  const gc = m3.filter(r => r.seed === FOCAL);
+  const destFus = ["competitor", "price", "protein", "taste"];
+  const destKeys = [...new Set(gc.filter(r => destFus.includes(r.fu2)).map(r => r.top))].sort((a, b) => (a === FOCAL ? -1 : b === FOCAL ? 1 : 0) || (["conditional", "none"].includes(a) - ["conditional", "none"].includes(b)) || a.localeCompare(b));
+  const dest = destFus.map(fu => { const c = countBy(gc.filter(r => r.fu2 === fu), r => r.top), n = gc.filter(r => r.fu2 === fu).length;
+    return `<tr><td class="dlab">${esc(FU.flatMap(g => g[1]).find(x => x[0] === fu)[1])}</td><td>${stackBar(c, n, destKeys)}</td><td class="r small">${n}</td></tr>`; }).join("");
+  return `<div class="chart-title">Pushback retention: share of conversations still recommending the brand after one follow-up (${engineNote()}) ${mlink("pushback")}</div>
+    ${FU.map(([g, items]) => `<div class="grouplab">${g}</div>` + retentionBars(m3, seeds, items).replace(/^<div class="legend">.*?<\/div>/, g === FU[0][0] ? "$&" : "").replace(/<div class="rscale">.*$/s, "")).join("")}
+    <div class="rscale"><span></span><div><span>0%</span><span>50%</span><span>100%</span></div></div>
+    <div class="note"><b>Longer bar = the AI sticks with its original brand choice more often.</b> The thin line on each bar marks that brand's retention with no pushback. Turn 1 is fixed and identical for every brand (“I'd recommend X. It's a solid choice.”), and only the follow-up is sent to the engine.</div>
+    <div style="margin-top:24px"><div class="chart-title">Where ${esc(FOCAL)}'s recommendation goes after the follow-up</div>${legend(destKeys)}
+      <div class="scroll-x"><table class="data dest"><colgroup><col style="width:290px"><col><col style="width:80px"></colgroup>
+      <thead><tr><th>Follow-up</th><th>Brand recommended after the follow-up</th><th class="r">Answers</th></tr></thead><tbody>${dest}</tbody></table></div></div>`;
+};
+
+DIM_RENDER.loyalty = () => {
+  const lo = ROWS.filter(r => r.m === "pilot_loyalty" && byEngine(r));
+  const brands = [...new Set(lo.map(r => r.held))].sort((a, b) => a === FOCAL ? -1 : b === FOCAL ? 1 : 0);
+  const conds = [["baseline", "“I usually buy X. Should I stick with it?”"], ["price", "…but I'm on a tight budget"], ["protein", "…but I want more protein"], ["walmart", "…but I shop at Walmart"]];
+  const VC = {stay: "var(--stay)", mixed: "var(--mixed)", switch: "var(--switch)"};
+  const cell = rs => { const c = countBy(rs, r => r.verdict), n = rs.length;
+    return `<div class="stack" style="height:18px">${["stay", "mixed", "switch"].filter(k => c[k]).map(k => `<div style="width:${c[k] / n * 100}%;background:${VC[k]}" data-tip="${k}: ${c[k]} of ${n}"></div>`).join("")}</div>
+      <div class="small num">${pct((c.stay || 0) / n)} stay</div>`; };
+  return `<div class="chart-title">Loyalty stay rate: what the AI advises a buyer of each brand (${engineNote()}) ${mlink("loyalty")}</div>
+    <div class="legend"><span>${swatch(VC.stay)}Stay with the brand</span><span>${swatch(VC.mixed)}Mixed (gives both options without a lean)</span><span>${swatch(VC.switch)}Switch to another brand</span></div>
+    <div class="scroll-x"><table class="data loy"><colgroup><col style="width:290px">${brands.map(() => "<col>").join("")}</colgroup>
+    <thead><tr><th>Consumer says</th>${brands.map(b => `<th>${swatch(color(b))} ${esc(b === "Private label" ? "Kirkland" : b)}</th>`).join("")}</tr></thead>
+    <tbody>${conds.map(([k, l]) => `<tr><td>${esc(l)}</td>${brands.map(b => `<td>${cell(lo.filter(r => r.held === b && r.cond === k))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <div class="note"><b>Longer blue bar = the AI tells the buyer to stay with their brand.</b> ${lo.length} answers, ${engineNote()}. Single-turn questions, with the usual brand named by the consumer.</div>`;
+};
+
+DIM_RENDER.h2h = () => {
+  const h = ROWS.filter(r => (r.m === "pilot_h2h" || r.m === "pilot_h2h_more") && byEngine(r)).map(r => ({...r, rv: r.rival || "daisy"}));
+  const rivals = Object.keys(F.rival_names).filter(k => h.some(r => r.rv === k));
+  const depTip = "It depends: no single winner, the AI says each brand suits different needs";
+  const rows = rivals.map(k => { const rs = h.filter(r => r.rv === k), n = rs.length, name = F.rival_names[k];
+    const canon = {kirkland: "Private label", breakstones: "Breakstone's", lactaid: "Lactaid", daisy: "Daisy", mulu: "Mulu", friendship: "Friendship"}[k];
+    const w = rs.filter(r => r.top === FOCAL).length, l = rs.filter(r => r.top === canon).length, dep = n - w - l;
+    const seg = [[w, color(FOCAL), `${FOCAL} wins`], [dep, "var(--cond)", "It depends (no single winner)"], [l, color(canon), `${name.split(" (")[0]} wins`]];
+    const label = k === "lactaid" ? `Lactaid <span class="small">(lactose-intolerant consumer)</span>` : esc(name);
+    return `<tr><td>${label}</td><td><div class="stack">${seg.filter(x => x[0]).map(x => `<div style="width:${x[0] / n * 100}%;background:${x[1]}" data-tip="${esc(x[2])}: ${x[0]} of ${n}"></div>`).join("")}</div></td>
+      <td class="r num">${pct(w / n)}</td><td class="r num">${pct(dep / n)}</td><td class="r num">${pct(l / n)}</td></tr>`; }).join("");
+  const first = h.filter(r => r.order === "gc_first"), second = h.filter(r => r.order !== "gc_first");
+  return `<div class="legend"><span>${swatch(color(FOCAL))}${esc(FOCAL)} wins</span><span>${swatch("var(--cond)")}It depends (no single winner: the AI says each brand suits different needs)</span><span>${swatch("var(--other)")}Rival wins (shown in the rival's colour)</span></div>
+    <div class="scroll-x"><table class="data h2h"><colgroup><col style="width:250px"><col><col style="width:110px"><col style="width:90px"><col style="width:90px"></colgroup>
+    <thead><tr><th>${esc(FOCAL)} vs.</th><th></th><th class="r">Good Culture wins</th><th class="r">It depends</th><th class="r">Rival wins</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="note"><b>Longer blue bar = Good Culture wins outright more often.</b> “Which is better, A or B cottage cheese?”, asked in both name orders. Name order barely matters: ${esc(FOCAL)} wins ${pct(first.filter(r => r.top === FOCAL).length / (first.length || 1))} of answers when named first and ${pct(second.filter(r => r.top === FOCAL).length / (second.length || 1))} when named second.</div>`;
+};
+
+DIM_RENDER.price = () => {
+  const p = ROWS.filter(r => (r.m === "pilot_m5" || r.m === "pilot_mulu_price") && byEngine(r));
+  const W = 400, H = 250, L = 46, R = 22, T = 30, B = 52;
+  const panel = (rv, spec) => {
+    const pts = (spec.order || Object.keys(spec.points)).map(gap => { const rs = p.filter(r => r.rival === rv && r.gap === gap), k = rs.filter(r => r.top === FOCAL).length;
+      return {gap, x: spec.xprice[gap], n: rs.length, k, y: rs.length ? k / rs.length : null, real: gap === spec.real, label: (spec.labels || {})[gap] || gap}; }).filter(d => d.n);
+    if (!pts.length) return "";
+    const xs = pts.map(d => d.x), x0 = Math.min(...xs), x1 = Math.max(...xs), pad = (x1 - x0) * 0.08;
+    const sx = x => L + (x - x0 + pad) / (x1 - x0 + 2 * pad) * (W - L - R), sy = y => T + (1 - y) * (H - T - B);
+    let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(spec.title)}">`;
+    g += `<text x="${L}" y="16" style="fill:var(--ink);font:600 12.5px var(--sans)">${esc(spec.short)} <tspan style="fill:var(--muted);font-weight:400">(${esc(spec.fixed)})</tspan></text>`;
+    [0, .5, 1].forEach(y => g += `<line class="${y === .5 ? "" : "grid"}" x1="${L}" x2="${W - R}" y1="${sy(y)}" y2="${sy(y)}" ${y === .5 ? 'stroke="var(--muted)" stroke-dasharray="4 4"' : ""}/><text x="${L - 8}" y="${sy(y) + 4}" text-anchor="end">${y * 100}%</text>`);
+    g += `<text x="${W - R}" y="${sy(.5) - 6}" text-anchor="end">switch point</text>`;
+    g += `<polyline fill="none" stroke="${color(FOCAL)}" stroke-width="2.5" points="${pts.map(d => `${sx(d.x)},${sy(d.y)}`).join(" ")}"/>`;
+    pts.forEach((d, i) => {
+      if (d.real) g += `<circle cx="${sx(d.x)}" cy="${sy(d.y)}" r="10" fill="none" stroke="${color(FOCAL)}" stroke-width="2"/>`;
+      g += `<circle cx="${sx(d.x)}" cy="${sy(d.y)}" r="5.5" fill="${color(FOCAL)}" stroke="var(--surface)" stroke-width="2" data-tip="${esc(d.label)} ($${d.x.toFixed(2)}): ${d.k} of ${d.n} answers pick ${esc(FOCAL)}${d.real ? " · real shelf prices" : ""}"/>`;
+      const above = d.y < .85;
+      g += `<text x="${sx(d.x)}" y="${sy(d.y) + (above ? -14 : 20)}" text-anchor="middle" style="fill:var(--ink);font:500 11.5px var(--mono)">${pct(d.y)}</text>`;
+      g += `<text x="${sx(d.x)}" y="${H - B + 18}" text-anchor="middle">$${d.x.toFixed(2)}</text>`;
+    });
+    g += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle">${esc(spec.xlabel)}</text></svg>`;
+    return `<div class="ppanel">${g}</div>`;
+  };
+  return `<div class="chart-title">Share of answers that pick ${esc(FOCAL)} as the price gap changes (${engineNote()}) ${mlink("price")}</div>
+    <div class="legend"><span>${swatch(color(FOCAL))}Share picking ${esc(FOCAL)}</span><span><i class="ring-key"></i>Real shelf prices</span><span><i class="dash-key"></i>50% switch point</span></div>
+    <div class="ppanels">${Object.entries(F.price_points).map(([rv, spec]) => panel(rv, spec)).join("")}</div>
+    <div class="note"><b>Line above the dashed 50% line = the AI mostly picks ${esc(FOCAL)}; below it = mostly the rival.</b> Prices are set for the test, with both name orders asked. Real Walmart shelf prices (October 2026): Good Culture $4.23, Daisy $3.97, Mulu $4.26.</div>`;
+};
+
+const REGION_ORDER = ["east", "south", "central", "west", "north"];
+DIM_RENDER.channel = () => {
+  const ex = ROWS.filter(r => r.m === "extra" && r.pid in F.retailers && byEngine(r));
+  const cards = Object.entries(F.retailers).map(([pid, name]) => { const rs = ex.filter(r => r.pid === pid), n = rs.length, c = countBy(rs, r => r.top);
+    const lead = Object.keys(c).filter(k => !["conditional", "none"].includes(k)).sort((a, b) => c[b] - c[a])[0];
+    const v = (c[FOCAL] || 0) / (n || 1);
+    return `<div class="scard" style="border-top-color:${lead ? color(lead) : "var(--line-strong)"}"><div class="sname">${esc(name)}</div>
+      <div class="sbig">${pct(v)}</div><div class="small">pick ${esc(FOCAL)}</div>${stackBar(c, n)}
+      <div class="small" style="margin-top:6px">Leader: <b style="color:var(--ink)">${lead ? esc(label(lead)) : "none"}</b></div></div>`; }).join("");
+  const keys = [...new Set(ex.map(r => r.top))].sort((a, b) => (a === FOCAL ? -1 : b === FOCAL ? 1 : 0) || (["conditional", "none"].includes(a) - ["conditional", "none"].includes(b)));
+  const reg = ROWS.filter(r => r.m === "pilot_region" && byEngine(r));
+  const leadFor = need => Object.fromEntries(REGION_ORDER.map(rg => { const rs = reg.filter(r => r.region === rg && r.need === need), c = countBy(rs, r => r.top);
+    const brand = Object.keys(c).filter(k => !["conditional", "none"].includes(k)).sort((a, b) => c[b] - c[a])[0];
+    return [rg, {brand, k: brand ? c[brand] : 0, n: rs.length, share: brand && rs.length ? c[brand] / rs.length : 0}]; }));
+  return `<div class="chart-title">“What's the best cottage cheese to buy at [store]?” (${engineNote()}) ${mlink("tps")}</div>
+    <div class="scards">${cards}</div>${legend(keys)}
+    <div class="note"><b>Big number = share of answers that pick ${esc(FOCAL)} in that store.</b> The card's top edge shows the leading brand's colour.</div>
+    <div class="chart-title" style="margin-top:22px">“I live in [region]…”: leading brand by region (${engineNote()})</div>
+    <div class="scards">${REGION_ORDER.map(rg => { const g = leadFor("neutral")[rg];
+      const line = (lab, L) => `<div class="rline"><span class="rq">${lab}</span>${L && L.brand ? `${swatch(color(L.brand))}<b>${esc(label(L.brand))}</b> <span class="small">${L.k}/${L.n}</span>` : `<span class="small">no clear pick</span>`}</div>`;
+      return `<div class="scard" style="border-top-color:${g && g.brand ? color(g.brand) : "var(--line-strong)"}"><div class="sname">${esc((F.region_names || {})[rg] || rg)}</div>
+        ${line("Leading brand", g)}</div>`; }).join("")}</div>
+    <div class="note"><b>Each card shows the brand the AI picks most often when the consumer names that region</b> (“I live in [region]. What cottage cheese should I buy?”). The card's top edge shows the leader's colour.</div>`;
+};
+
+const TAGS = [["pricey", "Called pricey"], ["cheap", "Called cheap"], ["high protein", "High protein"], ["clean ingredients", "Clean ingredients"],
+  ["live cultures", "Live cultures"], ["creamy", "Creamy"], ["good taste", "Good taste"], ["hard to find", "Hard to find"]];
+state.ptag = state.ptag || "tone";
+const NEG_TAGS = ["pricey", "hard to find"];
+DIM_RENDER.perception = () => {
+  const rs = ROWS.filter(byEngine), brands = ["Good Culture", "Daisy", "Private label", "Mulu", "Friendship", "Breakstone's"];
+  const men = Object.fromEntries(brands.map(b => [b, rs.filter(r => r.b[b]).map(r => r.b[b])]));
+  const opts = [["tone", "Overall sentiment (−2 to +2)"], ...TAGS.map(([k, l]) => [k, NEG_TAGS.includes(k) ? `${l} (negative)` : l])];
+  const isTone = state.ptag === "tone";
+  const vals = brands.map(b => { const m = men[b], n = m.length || 1;
+    if (isTone) return {b, v: m.reduce((s, x) => s + (x[0] || 0), 0) / n, k: null, n: m.length, neg: m.filter(x => (x[0] || 0) < 0).length / n};
+    const k = m.filter(x => x[1].includes(state.ptag)).length; return {b, v: k / n, k, n: m.length}; });
+  const max = isTone ? 2 : Math.max(0.2, Math.ceil(Math.max(...vals.map(x => x.v)) * 10) / 10);
+  const W = 720, H = 280, L = 44, R = 10, T = 26, B = 46, bw = (W - L - R) / brands.length;
+  const sy = v => T + (1 - Math.max(0, v) / max) * (H - T - B);
+  const fmt = v => isTone ? (v >= 0 ? "+" : "") + v.toFixed(2) : pct(v);
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(opts.find(o => o[0] === state.ptag)[1])} by brand">`;
+  const ticks = isTone ? [0, 0.5, 1, 1.5, 2] : [0, max / 2, max];
+  ticks.forEach(t => g += `<line class="${t === 0 ? "base" : "grid"}" x1="${L}" x2="${W - R}" y1="${sy(t)}" y2="${sy(t)}"/><text x="${L - 8}" y="${sy(t) + 4}" text-anchor="end">${isTone ? (t ? "+" + t : "0") : pct(t)}</text>`);
+  vals.forEach((x, i) => { const cx = L + i * bw + bw / 2, w = Math.min(64, bw * 0.55), y = sy(x.v);
+    const tip = isTone ? `${label(x.b)}: average overall sentiment ${fmt(x.v)} across ${x.n} mentions, ${pct(x.neg)} negative` : `${label(x.b)}: ${x.k} of ${x.n} mentions`;
+    g += `<rect x="${cx - w / 2}" y="${y}" width="${w}" height="${Math.max(1, sy(0) - y)}" rx="3" fill="${color(x.b)}" data-tip="${esc(tip)}"/>`;
+    g += `<text x="${cx}" y="${y - 7}" text-anchor="middle" style="fill:var(--ink);font:500 12px var(--mono)">${fmt(x.v)}</text>`;
+    g += `<text x="${cx}" y="${H - B + 18}" text-anchor="middle" style="fill:var(--ink-2);font:12.5px var(--sans)">${esc(x.b === "Private label" ? "Store brands" : x.b)}</text>`;
+    g += `<text x="${cx}" y="${H - B + 34}" text-anchor="middle">${x.n.toLocaleString()} mentions</text>`; });
+  g += `</svg>`;
+  return `<div class="ptools"><label for="ptag" class="small">Show</label><select id="ptag">${opts.map(([k, l]) => `<option value="${esc(k)}"${k === state.ptag ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>
+      <span class="small">${isTone ? "Average overall sentiment of each brand's mentions" : "Share of each brand's mentions that carry this description"} (${engineNote()}, all modules)</span></div>${g}
+    <div class="note"><b>Taller bar = ${isTone ? "the AI describes the brand more positively" : NEG_TAGS.includes(state.ptag) ? "the AI attaches this negative description to the brand more often, which counts against it" : "the AI attaches this description to the brand more often"}.</b>${isTone ? "" : " Bars show the share of a brand's mentions carrying the description, not its sentiment."}${isTone ? " Overall sentiment: +2 strongly positive, 0 neutral, −2 strongly negative." : ""}</div>`;
+};
+document.addEventListener("change", e => { if (e.target.id === "ptag") { state.ptag = e.target.value; const el = $("#dim-perception .body"); if (el) el.innerHTML = DIM_RENDER.perception(); } });
+
+const SRC = [["owned_focal", `${FOCAL} site`, "var(--s1)"], ["owned_other", "Other brand sites", "var(--s2)"], ["retailer", "Retailers", "var(--s3)"],
+  ["health", "Health sites", "var(--s6)"], ["ugc", "Reddit, YouTube, social", "var(--s7)"], ["editorial_other", "Media & blogs", "var(--other)"]];
+DIM_RENDER.sources = () => {
+  const eng = state.engine === "all" ? Object.keys(ENGINES) : [state.engine];
+  const srcColor = Object.fromEntries(SRC.map(x => [x[0], x[2]])), srcName = Object.fromEntries(SRC.map(x => [x[0], x[1]]));
+  const mix = eng.map(e => { const cs = ROWS.filter(r => r.e === e).flatMap(r => r.c), n = cs.length, c = countBy(cs, x => x[1]);
+    const share = ROWS.filter(r => r.e === e && r.m === "m1" && r.stage !== "category"), owned = share.filter(r => r.c.some(x => x[1] === "owned_focal")).length / (share.length || 1);
+    return `<tr><td>${esc(ENGINES[e])}</td><td><div class="stack">${SRC.filter(x => c[x[0]]).map(x => `<div style="width:${c[x[0]] / n * 100}%;background:${x[2]}" data-tip="${esc(x[1])}: ${pct(c[x[0]] / n, 1)} of ${n} citations"></div>`).join("")}</div></td>
+      <td class="r num">${pct(owned)}</td></tr>`; }).join("");
+  const cites = ROWS.filter(byEngine).flatMap(r => r.c);
+  const doms = countBy(cites, x => x[0]), domCls = {}; cites.forEach(x => domCls[x[0]] = x[1]);
+  const topD = Object.entries(doms).sort((a, b) => b[1] - a[1]).slice(0, 12).map(x => x[0]);
+  const per = Object.fromEntries(eng.map(e => [e, countBy(ROWS.filter(r => r.e === e).flatMap(r => r.c), x => x[0])]));
+  const hmax = Math.max(1, ...topD.flatMap(d => eng.map(e => per[e][d] || 0)));
+  const heat = `<table class="hm"><colgroup><col style="width:42%">${eng.map(() => "<col>").join("")}</colgroup>
+    <thead><tr><th>Site</th>${eng.map(e => `<th>${esc(ENGINES[e])}</th>`).join("")}</tr></thead><tbody>${topD.map(d => `<tr><td class="hs">${swatch(srcColor[domCls[d]] || "var(--other)")}${esc(d)}</td>${eng.map(e => { const v = per[e][d] || 0, a = v ? 0.1 + 0.85 * v / hmax : 0;
+      return `<td class="hc${a > 0.5 ? " dk" : ""}" style="${v ? `background:rgba(27,117,187,${a.toFixed(2)})` : ""}" data-tip="${esc(d)}: cited ${v} times by ${esc(ENGINES[e])} (${esc(srcName[domCls[d]] || "other")})">${v || "·"}</td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
+  const fx = D.facts, lab = fx.label;
+  const NUT = [["calories", "Calories", " kcal", lab.calories], ["sodium", "Sodium", " mg", lab.sodium], ["protein", "Protein", " g", lab.protein]];
+  const facts = `<table class="fm"><colgroup><col style="width:30%">${eng.map(() => "<col>").join("")}</colgroup>
+    <thead><tr><th>Fact</th>${eng.map(e => `<th>${esc(ENGINES[e])}</th>`).join("")}</tr></thead><tbody>${NUT.map(([k, nm, unit, truth]) => `<tr><td class="ff">${nm}<span>label ${truth}${unit}</span></td>${eng.map(e => { const x = (fx.by_engine[e] || {})[k];
+      if (!x || !x.n) return `<td class="fc na"><b>–</b>not stated</td>`;
+      const v = x.match_label / x.n, vals = Object.entries(x.values).sort((p, q) => q[1] - p[1]), top1 = vals[0];
+      const tie = vals.filter(y => y[1] === top1[1]).map(y => y[0]);
+      const sub = v >= 0.5 ? "right" : tie.length > 1 ? tie.sort((p, q) => p - q).join(" or ") + unit : "says " + top1[0] + unit;
+      return `<td class="fc ${v >= 0.5 ? "ok" : "bad"}" data-tip="${esc(nm)}: ${x.match_label} of ${x.n} figures match the label (${truth}${unit}). Stated values: ${esc(vals.map(([vv, c]) => vv + unit + " ×" + c).join(", "))}"><b>${pct(v)}</b>${esc(sub)}</td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
+  return `<div class="chart-title">Where each engine's citations come from (${engineNote()})</div><div class="legend">${SRC.map(x => `<span>${swatch(x[2])}${esc(x[1])}</span>`).join("")}</div>
+    <div class="scroll-x"><table class="data srcmix"><colgroup><col style="width:120px"><col><col style="width:170px"></colgroup>
+      <thead><tr><th>Engine</th><th>Share of all citations, by source type</th><th class="r">Brand questions citing goodculture.com</th></tr></thead><tbody>${mix}</tbody></table></div>
+    <div class="note"><b>Wider blue segment = the engine reads ${esc(FOCAL)}'s own website more often.</b></div>
+    <div class="grid2" style="margin-top:22px">
+      <div><div class="chart-title">Most-cited sites, by engine (${engineNote()})</div>${heat}<div class="note"><b>Darker cell = the engine cites the site more often.</b> The square beside each site shows its source type.</div></div>
+      <div><div class="chart-title">Does the AI state ${esc(FOCAL)}'s nutrition facts correctly?</div>${facts}
+        <div class="note"><b>Green = most stated figures match the label. Red = most are wrong, with the value most often given.</b> Label: ${esc(lab.product)}, per ½ cup. Good Culture sells several fat levels, so some mismatches may describe another product.</div></div>
+    </div>`;
+};
+
+/* ---------- drawer + answer cards ---------- */
+function card(r) {
+  const turns = r.q.length > 1 ? r.q.map((t, i) => `<div class="turn"><b>${i % 2 ? "Assistant (turn 1, fixed by the study)" : "Consumer"}</b>${esc(t)}</div>`).join("") : "";
+  return `<details class="ans"><summary><span class="qt">${esc(r.q[r.q.length - 1])}</span><span class="tag">${swatch(color(r.top))}${esc(label(r.top))}</span>
+    <span class="meta"><span>${esc(ENGINES[r.e])}</span><span>${esc(modLabel(r))}</span>${r.need && NEEDS[r.need] ? `<span>${esc(NEEDS[r.need])}</span>` : ""}${r.c.length ? `<span>${r.c.length} citations</span>` : ""}</span></summary>
+    <div class="ansbody">${turns}<div class="turn"><b>${esc(ENGINES[r.e])} answer</b><div class="answer-text">${esc(r.a)}</div></div>
+    ${r.c.length ? `<div class="cites">${r.c.slice(0, 10).map(x => `<a href="${esc(x[2])}" target="_blank" rel="noopener">${esc(x[0])}</a>`).join("")}</div>` : ""}</div></details>`;
+}
+function openDrawer(title, rows) {
+  closeDrawer();
+  const bg = document.createElement("div"); bg.className = "drawer-bg"; bg.addEventListener("click", closeDrawer);
+  const dr = document.createElement("div"); dr.className = "drawer"; dr.setAttribute("role", "dialog"); dr.setAttribute("aria-modal", "true");
+  dr.innerHTML = `<div class="drawer-head"><div><div class="eyebrow">${rows.length} answers · ${esc(engineNote())}</div><h2>${esc(title)}</h2></div><button class="btn" id="dclose">Close</button></div>
+    <div class="alist">${rows.map(card).join("") || `<p class="small">No answers.</p>`}</div>`;
+  document.body.append(bg, dr); $("#dclose").addEventListener("click", closeDrawer); $("#dclose").focus();
+}
+function closeDrawer() { document.querySelectorAll(".drawer,.drawer-bg").forEach(x => x.remove()); }
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+/* ---------- Answers ---------- */
+function renderAnswers() {
+  const opts = (vals, all) => `<option value="">${all}</option>` + vals.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join("");
+  const tops = Object.entries(countBy(ROWS, r => r.top)).sort((a, b) => b[1] - a[1]).map(([k]) => [k, label(k)]);
+  const mods = [...new Set([...Object.values(MODULES), "Retailer"])].map(m => [m, m]);
+  $("#tab-log").innerHTML = `<div class="narrow"><h2>Prompt-Response Log</h2><p class="lede wide">All ${ROWS.length.toLocaleString()} prompts and AI responses, with the judge's top pick and the sources each engine cited. Filter, search, and open any entry to read it in full.</p>
+    <div class="filters">
+      <label>Engine<select id="f-e">${opts(Object.entries(ENGINES), "All engines")}</select></label>
+      <label>Module<select id="f-m">${opts(mods, "All modules")}</select></label>
+      <label>Need<select id="f-n">${opts(Object.entries(NEEDS), "All needs")}</select></label>
+      <label>Top pick<select id="f-t">${opts(tops, "Any top pick")}</select></label>
+      <label>Search<input type="search" id="f-q" placeholder="Words in question or answer"></label>
+    </div><div class="small" id="f-count"></div><div class="alist" id="alist" style="margin-top:10px"></div><div class="more"><button class="btn" id="f-more">Show more</button></div></div>`;
+  let limit = 40;
+  const apply = () => {
+    const e = $("#f-e").value, m = $("#f-m").value, n = $("#f-n").value, t = $("#f-t").value, q = $("#f-q").value.trim().toLowerCase();
+    const rs = ROWS.filter(r => (!e || r.e === e) && (!m || modLabel(r) === m) && (!n || r.need === n) && (!t || r.top === t) &&
+      (!q || r.a.toLowerCase().includes(q) || r.q.join(" ").toLowerCase().includes(q)));
+    $("#f-count").textContent = `${rs.length.toLocaleString()} entries`;
+    $("#alist").innerHTML = rs.slice(0, limit).map(card).join("");
+    $("#f-more").hidden = rs.length <= limit;
+  };
+  ["f-e", "f-m", "f-n", "f-t"].forEach(id => $("#" + id).addEventListener("change", () => { limit = 40; apply(); }));
+  let tmr; $("#f-q").addEventListener("input", () => { clearTimeout(tmr); tmr = setTimeout(() => { limit = 40; apply(); }, 200); });
+  $("#f-more").addEventListener("click", () => { limit += 40; apply(); });
+  apply();
+}
+
+/* ---------- Method ---------- */
+function renderMethod() {
+  const v = D.validation, ja = v.judge_agreement || {}, hl = v.hand_labels || {}, A = F.asked || {};
+  const counts = countBy(ROWS.filter(r => r.e === Object.keys(ENGINES)[0]), modLabel);
+  const second = Object.entries(D.meta.judges).filter(([k]) => k !== D.meta.primary_judge).map(([, m]) => m).join(", ");
+  const src = F.engines_intro_source ? ` (<a href="${esc(F.engines_intro_source[1])}" target="_blank" rel="noopener">${esc(F.engines_intro_source[0])}</a>)` : "";
+  $("#tab-method").innerHTML = `<div class="prose">
+    <h2 style="margin-top:0">Study Design</h2>
+    <ol class="flow">${(F.flow || []).map(([t, d]) => `<li><span class="fs">${esc(t)}</span><span class="fd">${esc(d)}</span></li>`).join("")}</ol>
+    <p>${esc(F.engines_intro || "")}${src}</p>
+
+    ${(F.engines || []).length ? `<h2>Engine Selection</h2>
+    <div class="engines">${F.engines.map(e => `<div class="engine">
+      <div class="eng-head"><h3>${esc(e.app)}</h3><code>${esc(e.model)}</code></div>
+      <dl><dt>Free tier</dt><dd>${esc(e.tier)}</dd><dt>Reach</dt><dd>${esc(e.share)}</dd></dl>
+      <div class="pc"><div><div class="pc-h">Advantages</div><ul>${e.pros.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div><div class="pc-h">Disadvantages</div><ul>${e.cons.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div></div>
+      <div class="src">Source: ${e.sources.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join(" and ")}</div></div>`).join("")}</div>
+    <p class="small">Usage share and monthly users: <a href="${esc(F.engines_share_source[1])}" target="_blank" rel="noopener">${esc(F.engines_share_source[0])}</a>. ${esc(F.engines_excluded || "")}</p>` : ""}
+
+    <h2>Prompt Design</h2>
+    <p>Two rules apply to every question:</p>
+    <ul>${(A.rules || []).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+    <h3 class="sub-h">Core Prompt Grid</h3>
+    <p>The core test crosses three things a consumer's question can vary on:</p>
+    <dl class="defs">
+      <dt>Need</dt><dd>What the consumer cares about. Nine needs: ${esc((A.needs || []).join(", "))}.</dd>
+      <dt>Stage</dt><dd>Where they are in the purchase.<ul class="tight">${(A.stages || []).map(([k, d]) => `<li><b>${esc(k)}</b>: ${esc(d)}.</li>`).join("")}</ul></dd>
+      <dt>Phrasing</dt><dd>How the question is typed.<ul class="tight">${(A.phrasings || []).map(([k, d]) => `<li><b>${esc(k)}</b>: ${esc(d)}.</li>`).join("")}</ul></dd>
+    </dl>
+    ${A.example_grid ? `<p class="small" style="margin-bottom:6px">The nine questions for one need (${esc(A.example_need)}):</p>
+    <div class="scroll-x"><table class="data grid-ex"><thead><tr><th></th>${A.phrasings.map(([k]) => `<th>${esc(k)}</th>`).join("")}</tr></thead>
+      <tbody>${A.example_grid.map((row, i) => `<tr><th>${esc(A.stages[i][0])}</th>${row.map(q => `<td>“${esc(q)}”</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <p class="small">${esc(A.grid_note)}</p>` : ""}
+    <h3 class="sub-h">Supplementary Tests</h3>
+    <div class="scroll-x"><table class="data"><thead><tr><th>Test</th><th>Example</th><th>What it shows</th><th class="r">Asked per engine</th></tr></thead>
+      <tbody>${(A.tests || []).map(([t, ex, why]) => { const n = t === "Pushback" ? counts["M3 pushback"] : counts[t];
+        const m = ex.match(/^(.*?)\s*\((also [^)]*)\)\s*$/); const main = m ? m[1] : ex, also = m ? m[2] : "";
+        return `<tr><td><b>${esc(t)}</b></td><td>${esc(main)}${also ? `<div class="also">${esc(also[0].toUpperCase() + also.slice(1))}</div>` : ""}</td><td>${esc(why)}</td><td class="r">${n || "–"}</td></tr>`; }).join("")}</tbody></table></div>
+    <p class="small">An early scan of nine one-line need questions (${counts["Need scan"] || 0} per engine) was superseded by the main grid and is kept in the data for the record.</p>
+
+    <h2>Metric Definitions</h2>
+    <ul>
+      <li id="metric-tps"><b>Top-pick share</b>: share of answers whose explicit recommendation is the brand. Answers that recommend different brands for different conditions (“it depends”) credit no brand, which makes this a conservative count.</li>
+      <li id="metric-oi"><b>Over-index</b>: top-pick share divided by the brand's share of category dollar sales (Circana data via <a href="${esc(D.meta.sales_source?.url || "#")}" target="_blank" rel="noopener">Dairy Foods</a>, 52 weeks to Feb 2026). Above 1× means AI recommends the brand more often than consumers buy it.</li>
+      <li id="metric-pushback"><b>Pushback retention</b>: whether a recommendation survives one follow-up user question prompt.${pushbackFormula()}</li>
+      <li id="metric-loyalty"><b>Loyalty stay rate</b>: share of answers that advise a consumer to stay with the brand they say they usually buy (“I usually buy X. Should I stick with it?”), with and without a pressure such as a tight budget. Answers that give both options without a lean count as mixed.</li>
+      <li id="metric-price"><b>Price headroom</b>: in a two-tub choice, the share of answers picking the brand at each price gap. The switch point is where that share falls below 50%.</li>
+      <li id="metric-h2h"><b>Head-to-head</b>: wins, “it depends”, and losses when two brands are named.</li>
+      <li id="metric-perception"><b>Perception</b>: how each mention of a brand reads, scored by the judge model (Qwen) on a five-point scale. +2 is strongly positive (praised or recommended outright), +1 mildly positive, 0 neutral (named without judgement), −1 mildly negative (mostly drawbacks) and −2 strongly negative (advised against). Each mention also gets attribute tags such as “pricey” or “high protein”.</li>
+      <li id="metric-sources"><b>Source control</b>: share of answers citing the brand's own site, and whether the nutrition facts stated match the label.</li>
+    </ul>
+
+    <h2>Judge Validation</h2>
+    <p>One judge scores every conversation: <b>${esc(D.meta.judges[D.meta.primary_judge])}</b>, an open-weight model from a different company than the three engines tested. Its coding was checked in two ways:</p>
+    <ul>
+      <li><b>A second model:</b> ${esc(second)} re-scored all ${(ja.n || 0).toLocaleString()} answers independently with the same rules. The two agree on the top pick in ${pct(ja.top_pick_agreement)} of answers (Cohen's κ = ${ja.top_pick_kappa != null ? ja.top_pick_kappa.toFixed(2) : "–"}), and brand top-pick shares differ by about one point at most. Haiku serves only as this cross-check, not as the judge for the final analysis, because it is made by Anthropic, the same company as the Claude engine under test, and could favour its own family's answers.</li>
+      ${hl.n ? `<li><b>Hand labels:</b> ${hl.n} answers were labelled by hand, most of them cases where the two models disagree. Re-weighted to the full data, the judge's top pick is right about ${pct(hl.est_accuracy?.[D.meta.primary_judge])} of the time. The main gap: people read “X is best, or Y if you're on a budget” as a pick for X, where the judge often codes “it depends”. Counting the first brand in those answers raises ${esc(FOCAL)}'s top-pick share from 46% to 51%, so the figures shown here are conservative.</li>` : ""}
+    </ul>
+
+    <h2>Limitations</h2>
+    <ul>${(F.limits || []).map(([t, x]) => `<li><b>${esc(t)}</b>: ${esc(x)}</li>`).join("")}</ul>
+    <p class="note">Outside-in only: public sources, no contact with the company, retailers or competitors. API costs (about $50) were covered by Harvard University's education plan for students.</p>
+
+    ${F.future ? `<h2>Future Work</h2><ul>${F.future.map(([t, x]) => `<li><b>${esc(t)}</b>: ${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${F.track ? `<h2>Ongoing Monitoring</h2><p>${esc(F.track.intro)}</p><ul>${F.track.items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    <h2>Extending to Other Brands</h2>
+    ${F.stretch ? `<p>${esc(F.stretch.intro)}</p><ul>${F.stretch.items.map(([t, x]) => `<li><b>${esc(t)}</b>: ${esc(x)}</li>`).join("")}</ul><p>${esc(F.stretch.outro)}</p>` : ""}
+<pre>python -m aibench.cli collect --config configs/birkenstock.yaml
+python -m aibench.cli score   --config configs/birkenstock.yaml --judge qwen
+python -m aibench.cli site    --config configs/birkenstock.yaml</pre>
+  </div>`;
+  { const root = $("#tab-method"), inner = root.firstElementChild, hs = [...inner.querySelectorAll("h2")];
+    hs.forEach((x, k) => x.id = "msec-" + k);
+    const wrap = document.createElement("div"); wrap.className = "dash";
+    wrap.innerHTML = `<nav class="sidenav" aria-label="Method sections"><div><div class="grp">Method</div>${hs.map((x, k) => `<a href="#method" data-msec="${k}">${esc(x.textContent)}</a>`).join("")}</div></nav>`;
+    root.appendChild(wrap); wrap.appendChild(inner);
+    wrap.querySelectorAll("[data-msec]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); document.getElementById("msec-" + a.dataset.msec).scrollIntoView({behavior: "smooth", block: "start"}); })); }
+}
+
+function renderTools() {
+  const T = F.tools || {rows: []};
+  const tools = `<h2 style="margin-top:0">Tools</h2><p class="lede wide">${esc(T.intro || "")}</p>
+    <div class="scroll-x"><table class="data tools"><colgroup><col style="width:24%"><col style="width:42%"><col></colgroup>
+      <thead><tr><th>Tool</th><th>What it contributed</th><th>Why this one</th></tr></thead>
+      <tbody>${T.rows.map(([a, b, c]) => `<tr><td><b>${esc(a)}</b></td><td>${esc(b)}</td><td>${esc(c)}</td></tr>`).join("")}</tbody></table></div>
+    ${T.cost ? `<p class="note" style="margin-top:14px">${esc(T.cost)}</p>` : ""}`;
+  const time = T.time ? `<h2>Time Spent</h2><div class="scroll-x"><table class="data tools"><colgroup><col style="width:24%"><col><col style="width:90px"></colgroup>
+      <thead><tr><th>Stage</th><th>What it covered</th><th class="r">Hours</th></tr></thead>
+      <tbody>${T.time.map(([a, b, c]) => `<tr><td><b>${esc(a)}</b></td><td>${esc(b)}</td><td class="r num">${esc(c)}</td></tr>`).join("")}
+      <tr><td><b>Total</b></td><td></td><td class="r num"><b>${T.time.reduce((s, x) => s + Number(x[2]), 0)}</b></td></tr></tbody></table></div>` : "";
+  const srcs = F.sources_all ? `<h2>Sources</h2>${F.sources_all.map(([g, xs]) => `<h3 class="srcg">${esc(g)}</h3><ol class="srclist">${xs.map(([l, u]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener">${esc(l)}</a></li>`).join("")}</ol>`).join("")}
+    ${F.sources_note ? `<p class="note">${esc(F.sources_note)}</p>` : ""}` : "";
+  $("#tab-tools").innerHTML = `<div class="prose">${tools}${time}${srcs}</div>`;
+  const root = $("#tab-tools"), inner = root.firstElementChild, hs = [...inner.querySelectorAll("h2")];
+  hs.forEach((x, k) => x.id = "asec-" + k);
+  const wrap = document.createElement("div"); wrap.className = "dash";
+  wrap.innerHTML = `<nav class="sidenav" aria-label="Appendix sections"><div><div class="grp">Appendix</div>${hs.map((x, k) => `<a href="#tools" data-asec="${k}">${esc(x.textContent)}</a>`).join("")}</div></nav>`;
+  root.appendChild(wrap); wrap.appendChild(inner);
+  wrap.querySelectorAll("[data-asec]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); document.getElementById("asec-" + a.dataset.asec).scrollIntoView({behavior: "smooth", block: "start"}); }));
+}
+
+/* ---------- tooltip ---------- */
+const tip = $("#tip");
+document.addEventListener("mouseover", e => { const t = e.target.closest("[data-tip]"); if (!t) { tip.hidden = true; return; } tip.textContent = t.dataset.tip; tip.hidden = false; });
+document.addEventListener("mousemove", e => { if (tip.hidden) return; const x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8); tip.style.left = x + "px"; tip.style.top = (e.clientY + 16) + "px"; });
+document.addEventListener("mouseout", e => { if (!e.relatedTarget || !e.relatedTarget.closest?.("[data-tip]")) tip.hidden = true; });
+
+showTab(location.hash.slice(1) || "findings");
+</script>
+</body>
+</html>

@@ -5,6 +5,11 @@
   python -m aibench.cli collect --config ... --engines anthropic --repeats 1 --limit 10
   python -m aibench.cli score   --config ... --judge qwen               # LLM judge -> coded answers (--sample N)
   python -m aibench.cli agree   --config ...                            # kappa between the two judges
+  python -m aibench.cli gold-sheet --config ...                         # hand-label sheet (data/validation/)
+  python -m aibench.cli gold-score --config ...                         # judges vs hand labels
+  python -m aibench.cli results --config ...                            # all results -> one JSON
+  python -m aibench.cli export  --config ...                            # flat CSV tables for Excel / pandas
+  python -m aibench.cli site    --config ...                            # static dashboard -> docs/index.html
   python -m aibench.cli aspects --config ...                            # pros / cons per brand (optional)
   python -m aibench.cli summary --config ...                            # all result tables (see report.py)
 """
@@ -19,8 +24,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
+import pandas as pd
 
-from . import aspects, build, engines, judge, report
+from . import analysis, aspects, build, engines, gold, judge, report, site
 
 
 def _answers_path(config):
@@ -272,6 +278,88 @@ def cmd_agree(args):
                      out=Path("data/processed") / f"{Path(args.config).stem}_judge_disagreements.csv")
 
 
+def _gold_paths(config):
+    d, stem = Path("data/validation"), Path(config).stem
+    return d / f"{stem}_hand_labels.xlsx", d / f"{stem}_hand_label_key.csv"
+
+
+def cmd_gold_sheet(args):
+    """Write the hand-label sheet: judge disagreements + a few agreements, shuffled, judges hidden."""
+    cfg = build.load_yaml(args.config)
+    sheet, key = _gold_paths(args.config)
+    if sheet.exists():
+        raise SystemExit(f"{sheet} already exists (it may hold your labels); delete it first to rebuild")
+    first, second = cfg["primary_judge"], next(j for j in cfg["judges"] if j != cfg["primary_judge"])
+    a = {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, first))}
+    b = {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, second))}
+    df = gold.make_sheet(_read_jsonl(_answers_path(args.config)), a, b, cfg, sheet,
+                         n_disagree=args.limit or 40, n_agree=10)
+    df[["row", "task_id", "subset", "module", "engine_hidden"]].to_csv(key, index=False)
+    print(f"{len(df)} answers -> {sheet}  (key: {key})")
+
+
+def cmd_gold_score(args):
+    """Score both judges against the filled hand labels."""
+    cfg = build.load_yaml(args.config)
+    sheet, key = _gold_paths(args.config)
+    judges = {j: {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, j))} for j in cfg["judges"]}
+    gold.score(sheet, pd.read_csv(key), judges, cfg)
+
+
+def cmd_results(args):
+    """Every result in one JSON file (feeds the write-up and the dashboard)."""
+    cfg = build.load_yaml(args.config)
+    first = cfg["primary_judge"]
+    others = [j for j in cfg["judges"] if j != first]
+    coded = {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, first))}
+    second = {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, others[0]))} if others else None
+    res = analysis.build_results(cfg, _read_jsonl(_answers_path(args.config)), coded, second)
+    out = Path("data/processed") / f"{Path(args.config).stem}_results.json"
+    out.write_text(json.dumps(res, ensure_ascii=False, default=str))
+    print(f"-> {out} ({out.stat().st_size / 1e6:.1f} MB)")
+
+
+def cmd_export(args):
+    """Flat CSV tables (answers / brand mentions / citations) for Excel or pandas."""
+    cfg = build.load_yaml(args.config)
+    first = cfg["primary_judge"]
+    others = [j for j in cfg["judges"] if j != first]
+    coded = {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, first))}
+    second = {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, others[0]))} if others else None
+    tabs = analysis.tables(cfg, _read_jsonl(_answers_path(args.config)), coded, second,
+                           others[0] if others else "second")
+    stem = Path(args.config).stem
+    for name, t in tabs.items():
+        out = Path("data/processed") / f"{stem}_table_{name}.csv"
+        t.to_csv(out, index=False)
+        print(f"-> {out}  ({len(t):,} rows x {t.shape[1]} columns)")
+
+
+def cmd_site(args):
+    """Static dashboard: docs/index.html with every answer embedded (findings text from configs/<study>_findings.json)."""
+    cfg = build.load_yaml(args.config)
+    first = cfg["primary_judge"]
+    others = [j for j in cfg["judges"] if j != first]
+    coded = {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, first))}
+    second = {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, others[0]))} if others else None
+    gold_info = None
+    sheet, key = _gold_paths(args.config)
+    if sheet.exists() and key.exists():
+        judges = {j: {r["task_id"]: r for r in _read_jsonl(_coded_path(args.config, j))} for j in cfg["judges"]}
+        try:
+            t = gold.score(sheet, pd.read_csv(key), judges, cfg)
+            if "est_top_pick_accuracy_full_data" in t:
+                gold_info = {"n": int(len(pd.read_excel(sheet, sheet_name="label").top_pick.dropna())),
+                             "est_accuracy": t["est_top_pick_accuracy_full_data"].to_dict()}
+        except SystemExit:
+            pass
+    findings_path = Path(args.config).with_name(f"{Path(args.config).stem}_findings.json")
+    findings = json.loads(findings_path.read_text()) if findings_path.exists() else {}
+    data = site.payload(cfg, _read_jsonl(_answers_path(args.config)), coded, second, gold_info)
+    out = site.write(cfg, data, findings, Path("docs") / "index.html")
+    print(f"-> {out} ({out.stat().st_size / 1e6:.1f} MB)")
+
+
 def main():
     p = argparse.ArgumentParser(prog="aibench")
     sub = p.add_subparsers(required=True)
@@ -280,7 +368,9 @@ def main():
     mp.add_argument("--config", default="configs/goodculture.yaml")
     mp.set_defaults(fn=cmd_models)
     for name, fn in [("plan", cmd_plan), ("collect", cmd_collect), ("score", cmd_score), ("summary", cmd_summary),
-                     ("aspects", cmd_aspects), ("agree", cmd_agree)]:
+                     ("aspects", cmd_aspects), ("agree", cmd_agree),
+                     ("gold-sheet", cmd_gold_sheet), ("gold-score", cmd_gold_score), ("results", cmd_results),
+                     ("export", cmd_export), ("site", cmd_site)]:
         s = sub.add_parser(name)
         s.add_argument("--config", required=True)
         s.add_argument("--modules", nargs="*")

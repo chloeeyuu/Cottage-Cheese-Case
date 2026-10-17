@@ -3,7 +3,7 @@ name = "aibench"
 version = "0.1.0"
 description = "Benchmark how AI answer engines recommend a brand vs its competitors"
 requires-python = ">=3.10"
-dependencies = ["pyyaml", "pandas", "httpx"]   # engines are called over plain HTTPS; no vendor SDKs
+dependencies = ["pyyaml", "pandas", "httpx", "openpyxl"]   # engines are called over plain HTTPS; no vendor SDKs
 
 [project.optional-dependencies]
 dev = ["pytest"]
