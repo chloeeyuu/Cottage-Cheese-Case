@@ -1,106 +1,113 @@
-# Cottage-Cheese-Case: Good Culture in AI answer engines
+# Good Culture Through AI Answer Engines
 
-A take-home case study. It asks whether Good Culture is the brand AI answer engines
-(ChatGPT, Gemini, Claude) **tell shoppers to buy**, and whether that position would hold if a larger
-dairy player pushed harder into the category.
+A benchmark of how ChatGPT, Gemini and Claude recommend cottage cheese brands: where Good Culture wins,
+who it loses to, whether its position would hold against a larger dairy brand, and what shapes the answers.
 
-> **Status:** data collected and coded. 1,596 answers (532 per engine), each coded by two LLM judges.
-> Still to do: hand labels on judge disagreements, the write-up and the webpage.
+**Main page:** [`docs/index.html`](docs/index.html), also served with GitHub Pages at
+<https://chloeeyuu.github.io/Cottage-Cheese-Case/>. It contains the findings, a dashboard of nine measures,
+the method, every prompt and response, and an appendix with tools, time spent and sources.
+
+## At a glance
+
+- 1,596 prompt-response pairs, 532 per engine, from the free-tier default models with web search on:
+  `gpt-6-luna` (OpenAI), `gemini-3.5-flash-lite` (Google), `claude-sonnet-5-5` (Anthropic).
+- Good Culture is the top pick in 46% of brand and purchase questions, more than four times its 11% share of
+  dollar sales (Circana). It leads on taste and everyday use, and is weaker on price, mass retail and,
+  on Gemini and Claude, protein.
+- Every answer is coded by an independent judge model and cross-checked by a second model and by hand labels.
 
 ## How it works
 
-One YAML config drives the whole pipeline:
+One YAML config drives the whole pipeline. To study another brand, write a new config and question files.
 
 ```
-config -> prompt builder -> collector (cached) -> answers -> two LLM judges (+ optional pros/cons pass) -> report
+config -> prompt builder -> collector (cached) -> answers -> judge models -> metrics -> static site
 ```
 
-To swap in another brand (e.g. Birkenstock), write a new `configs/<brand>.yaml` and its prompt files.
-The code does not change.
-
-Engines are called with web search on and no system prompt, using the model each free consumer tier runs:
-`gpt-6-luna` (OpenAI), `gemini-3.5-flash-lite` (Google), `claude-sonnet-5-5` (Anthropic).
-
-## Judging
-
-Every answer is coded twice with the same rules (`src/aibench/judge.py`): top pick, held-brand verdict
-(stay / switch), and each brand's sentiment and attributes.
+## Judging and validation
 
 | Judge | Model | Role |
 |---|---|---|
-| `qwen` | Qwen3.8 27B via OpenRouter (open weights, reasoning on, host pinned) | **Primary**: a different family from all three engines, so no engine is scored by its own maker |
-| `haiku` | Claude Haiku 5.5 | Independent check |
+| `qwen` | Qwen3.8 27B via OpenRouter (open weights, reasoning on, host pinned) | Primary: from a different company than all three engines |
+| `haiku` | Claude Haiku 5.5 | Independent cross-check on every answer |
 
-Agreement on all 1,596 answers: top pick kappa 0.84 (87%), stay/switch kappa 0.71, "Good Culture is pricey"
-kappa 0.91. Top-pick shares differ by at most 1.1 points between the two judges (Good Culture 32.7% vs 31.8%).
-Most disagreements are "clear pick vs conditional pick" (e.g. "Good Culture is best; Good & Gather is the
-budget option").
+The two judges agree on the top pick in 87% of answers (Cohen's κ 0.84). On 49 hand-labelled answers,
+mostly cases where the judges disagree, the primary judge's top pick is right about 82% of the time after
+re-weighting to the full data. "It depends" answers credit no brand, so top-pick shares are conservative.
 
 ## What is asked
 
-| Prompt file | Module(s) | Question | Answers (3 engines) |
-|---|---|---|---|
-| `m1_need_journey.yaml` | M1 | Who does AI recommend, unprompted, across 9 shopper needs x 3 funnel stages x 3 phrasings? | 486 |
-| `m3_pushback_resilience.yaml` | M3 | After AI "recommends" GC / Daisy / Kirkland, does it hold under pushback (price, taste, protein, retailer, region, competitor)? Net of a placebo follow-up | 522 |
-| `targeted_probes.yaml` | loyalty, head-to-head, M2, M5, regions | "I usually buy X, should I switch?"; GC vs each rival in both name orders; category question then "which brand?"; switch point at hypothetical prices; regional home advantage | 498 |
-| `extra_questions.yaml` | extra | Gut health, store brand vs name brand, kids, best buy at each retailer | 90 |
+| Prompt file | Test | Answers (3 engines) |
+|---|---|---|
+| `prompts/core_need_grid.yaml` | 9 consumer needs x 3 purchase stages x 3 phrasings, no brand named | 486 |
+| `prompts/pushback_tests.yaml` | After a seeded recommendation (Good Culture, Daisy, Kirkland), does it survive a follow-up on price, taste, protein, store, region or a rival? | 522 |
+| `prompts/supplementary_tests.yaml` | Loyalty, head-to-head in both name orders, price gaps, regions | 498 |
+| `prompts/store_and_need_questions.yaml` | Best buy at five stores, plus gut health, kids and store brands | 90 |
 
-Module labels in `targeted_probes.yaml` keep their original `pilot_*` names because the label is part of each
-answer's cache key.
+Module labels inside the prompt files keep their original names (for example `pilot_h2h`) because the label
+is part of each answer's cache key.
 
 ## Run it
 
 ```bash
 pip install -e ".[dev]"
-pytest                                                                    # design checks
-python -m aibench.cli plan    --config configs/goodculture.yaml            # call budget per module x engine
-python -m aibench.cli collect --config configs/goodculture.yaml --modules extra --engines anthropic gemini openai
-python -m aibench.cli score   --config configs/goodculture.yaml --judge qwen    # code answers not yet coded
-python -m aibench.cli score   --config configs/goodculture.yaml --judge haiku   # second judge
-python -m aibench.cli agree   --config configs/goodculture.yaml                 # kappa + disagreements CSV
-python -m aibench.cli summary --config configs/goodculture.yaml                 # all result tables
-python -m aibench.cli aspects --config configs/goodculture.yaml            # optional: pros/cons per brand
+pytest                                                                      # design checks
+python -m aibench.cli plan    --config configs/goodculture.yaml              # call budget per test x engine
+python -m aibench.cli collect --config configs/goodculture.yaml --repeats 2  # engine answers (cached)
+python -m aibench.cli score   --config configs/goodculture.yaml --judge qwen # primary judge
+python -m aibench.cli score   --config configs/goodculture.yaml --judge haiku
+python -m aibench.cli agree   --config configs/goodculture.yaml              # judge agreement + disagreements CSV
+python -m aibench.cli gold-sheet --config configs/goodculture.yaml           # hand-label sheet
+python -m aibench.cli gold-score --config configs/goodculture.yaml           # judges vs hand labels
+python -m aibench.cli export  --config configs/goodculture.yaml              # answers, mentions, citations as CSV
+python -m aibench.cli site    --config configs/goodculture.yaml              # builds docs/index.html
 ```
 
-Every step is cached, so a rerun skips anything already done. API keys (`ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`)
-go in `.env` (see `.env.example`);
+Every step is cached, so a rerun skips anything already done. API keys (`ANTHROPIC_API_KEY`,
+`GEMINI_API_KEY`, `OPENAI_API_KEY`, `OPENROUTER_API_KEY`) go in `.env` (see `.env.example`).
 `AIBENCH_MOCK=1` runs everything offline.
 
-To add a question, add one line to `prompts/extra_questions.yaml`. No code change is needed.
-
-## Repo layout
+## Repository layout
 
 ```
-configs/goodculture.yaml   brands, aliases, owned domains, engines, judges
-prompts/
-  m1_need_journey.yaml         M1: 9 needs x 3 stages x 3 phrasings, brand-free
-  m3_pushback_resilience.yaml  M3: seeded recommendation + pushback follow-ups
-  targeted_probes.yaml         loyalty, head-to-head, M2 two-step, M5 price, regions
-  extra_questions.yaml         one-line questions; add more here
+configs/
+  goodculture.yaml              brands, aliases, owned websites, engines, judges
+  goodculture_findings.json     brand-specific text shown on the site
+prompts/                        question files (see table above)
 src/aibench/
-  build.py                 prompt files -> run plan (one row per API call, stable task_id)
-  engines.py               HTTPS adapters for OpenAI / Gemini / Anthropic, with web search
-  judge.py                 judge rules + schema; Anthropic (tool call) and OpenRouter (JSON) backends
-  aspects.py               optional pass: pros / cons per brand with verbatim, verified quotes
-  extract.py               brand mentions, citation domain classes
-  metrics.py               top-pick share, over-index, ARR, Wilson intervals, Cohen's kappa
-  report.py                result tables and judge agreement
-  cli.py                   the commands above
-data/reference/            Circana category data, product labels and prices (with sources and dates)
-data/raw/goodculture_answers.jsonl                  every engine answer with citations (append-only)
-data/processed/goodculture_judged_qwen.jsonl        primary coding
-data/processed/goodculture_judged_haiku.jsonl       second coding
-data/processed/goodculture_judge_disagreements.csv  answers where the two judges differ on the top pick
-tests/test_pipeline.py     design checks (counts, no brand leakage, cache keys, parsers, metrics)
+  build.py                      prompt files -> run plan (one row per API call, stable task_id)
+  engines.py                    HTTPS adapters for OpenAI, Gemini and Anthropic, with web search
+  judge.py                      judging rules and schema; Anthropic and OpenRouter backends
+  extract.py                    brand mentions, citation source classes
+  metrics.py                    top-pick share, over-index, retention, Wilson intervals, Cohen's kappa
+  analysis.py                   result tables and the nutrition fact check
+  gold.py                       hand-label sheet and judge scoring
+  aspects.py                    optional pass: pros and cons per brand with verified quotes
+  report.py                     summary tables and judge agreement
+  site.py, site_template.html   builds the static page
+  cli.py                        the commands above
+data/
+  raw/goodculture_answers.jsonl                   every engine answer with citations (append-only)
+  processed/goodculture_judged_qwen.jsonl         primary coding
+  processed/goodculture_judged_haiku.jsonl        second coding
+  processed/goodculture_judge_disagreements.csv   answers where the two judges differ
+  processed/goodculture_table_*.csv               answers, mentions and citations as flat tables
+  processed/goodculture_results.json              all computed results
+  validation/goodculture_hand_labels.xlsx         hand-label sheet (49 answers)
+  reference/circana_sales_by_brand.csv            category dollar sales by brand
+  reference/product_labels.csv                    labels and prices, each with source URL and capture date
+docs/index.html                 the main page
+tests/test_pipeline.py          design checks (counts, no brand leakage, cache keys, parsers, metrics)
 ```
 
-## Cost and data sources
+## Extending to other brands
 
-The brief asked for no spending. The author chose to pay for the API calls herself: roughly $50 in
-total, estimated from token usage (Claude engine ~$23, OpenAI ~$12, Gemini free tier,
-Haiku judge ~$6, Qwen judge ~$6).
+The pipeline, judges, metrics and page are reusable. For a new brand (for example Birkenstock), the config,
+question files, judge attribute list, fact-check fields, price test and findings text change. The Method tab
+on the site lists each change.
 
-- Circana category data via [Dairy Foods, May 2026](https://www.dairyfoods.com/articles/99101-cottage-cheese-sales-top-2-billion)
-- Product labels and prices: `data/reference/product_labels.csv`; each row records its source URL and capture date
+## Cost and sources
 
-Outside-in only: public sources, and no contact with the company, retailers or competitors.
+API costs came to about $50 (Claude engine ~$23, OpenAI ~$12, Gemini free tier, each judge ~$6) and were
+covered by Harvard University's education plan for students. All sources are listed in the site's Appendix.
+The study is outside-in only: public sources, and no contact with the company, retailers or competitors.

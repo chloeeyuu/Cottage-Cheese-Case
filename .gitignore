@@ -166,8 +166,6 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# mkdocs/Zensical documentation
-/site
 
 # mypy
 .mypy_cache/
@@ -227,3 +225,6 @@ __marimo__/
 
 # Trial runs
 data/processed/_trial/
+
+# Working drafts (not part of the submission)
+archive/
