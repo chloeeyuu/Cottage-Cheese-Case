@@ -1,0 +1,55 @@
+# M3 — Recommendation resilience (ARR)
+# Two arms:
+#   A. SEEDED (primary metric): turn 1 is written by us (an assistant message recommending a brand,
+#      same template for every brand), then ONE follow-up is sent. Each seeded brand gets the same
+#      number of threads, so ARR comparisons (GC vs Daisy vs Kirkland) have equal, adequate n.
+#      Only the follow-up turn is an API call -> 1 call per thread.
+#   B. NATURAL (realism check): follow-ups appended to real M1 answers that already named a top pick.
+#      Turn 1 costs nothing extra (reused from M1).
+# Net ARR = retention after a follow-up minus retention after the placebo follow-up.
+# {top_rival} is filled per thread with the strongest rival to the seeded/picked brand (symmetric).
+
+module: m3_resilience
+version: 0.3
+
+openers:
+  neutral:        "What {category} should I buy?"
+  protein:        "Which {category} has the most protein?"
+  clean:          "Which {category} has the cleanest ingredients?"
+  weight:         "Which {category} is best for weight loss?"
+  taste_texture:  "Which {category} tastes the best?"
+  general_brand:  "What's the best {category} brand?"
+
+seeded:
+  brands: [Good Culture, Daisy, Kirkland]
+  # Deliberately claim-free and identical across brands. Any factual claim (protein, ingredients,
+  # availability) could be false for one brand and invite a "correction" that looks like a switch.
+  assistant_turn_template: "I'd recommend {brand}. It's a solid choice."
+  repeats: 2
+
+follow_ups:
+  # --- preference shifts: all 6 openers ---
+  price:      {group: preference, text: "What if I'm on a tight budget?"}
+  taste:      {group: preference, text: "What if texture matters most to me?"}
+  protein:    {group: preference, text: "I want the most protein possible."}
+  # --- distribution: retailers, all 6 openers ---
+  retailer_walmart: {group: distribution, text: "Good to know. I shop at Walmart, does that change anything?"}
+  retailer_costco:  {group: distribution, text: "Good to know. I shop at Costco, does that change anything?"}
+  retailer_kroger:  {group: distribution, text: "Good to know. I shop at Kroger, does that change anything?"}
+  # --- distribution: 5 broad regions (E/S/W/N/Central), ONLY neutral + protein openers (cost control) ---
+  region_east:    {group: distribution, openers: [neutral, protein], text: "Good to know. I live on the East Coast, does that change anything?"}
+  region_south:   {group: distribution, openers: [neutral, protein], text: "Good to know. I live in the South, does that change anything?"}
+  region_west:    {group: distribution, openers: [neutral, protein], text: "Good to know. I live on the West Coast, does that change anything?"}
+  region_north:   {group: distribution, openers: [neutral, protein], text: "Good to know. I live in the Pacific Northwest, does that change anything?"}
+  region_central: {group: distribution, openers: [neutral, protein], text: "Good to know. I live in the Midwest, does that change anything?"}
+  # --- controls: all 6 openers ---
+  competitor: {group: control, text: "Would you still pick it over {top_rival}?"}
+  placebo:    {group: control, text: "Thanks, anything else I should know?"}
+
+natural:
+  source: m1_journey            # brand + purchase stage answers with a coded top pick
+  sample_per_engine: 20         # random, stratified by top-pick brand where possible
+  follow_ups: [price, taste, protein, retailer_walmart, retailer_costco, retailer_kroger, competitor, placebo]
+
+# Call budget (3 engines): 58 threads (6 openers x 8 + 2 openers x 5 regions) x 3 brands x repeats x engines.
+# Pilot run: Claude only, 1 repeat -> 174 calls.

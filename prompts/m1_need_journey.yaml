@@ -1,0 +1,144 @@
+# M1 — Consumer journey grid
+# 9 need states x 3 stages x 3 phrasings = 81 prompts.
+#
+# Rules
+#   1. No brand names anywhere; {category} is filled from config (e.g. "cottage cheese").
+#   2. Phrasings: p1 = plain question (no persona), p2 = persona, p3 = short, search-style (no persona).
+#   3. Persona rule (p2): state ONE fact that expresses the need itself. No age, gender, income,
+#      region, retailer or household details: those are separate variables (region/retailer live in M3).
+#   4. No system prompt is sent: every call is a fresh, context-free user.
+# Need states are category-specific: a new brand (e.g. Birkenstock) gets its own need-state file.
+
+module: m1_journey
+version: 0.2
+stages:
+  category: "Learning about the category (no brand asked for)"
+  brand: "Choosing a brand"
+  purchase: "At the point of purchase"
+
+prompts:
+  protein:                      # expected: GC likely strong
+    category:
+      - "Is {category} a good source of protein for building muscle?"
+      - "I'm trying to hit 140g of protein a day. Is {category} worth adding to my diet?"
+      - "{category} protein benefits"
+    brand:
+      - "Which {category} brand has the most protein?"
+      - "I lift weights four times a week. What's the best {category} for me?"
+      - "highest protein {category} brand"
+    purchase:
+      - "I'm at the grocery store and want a high-protein {category}. Which one should I grab?"
+      - "I want a post-workout snack with lots of protein. Which {category} should I buy?"
+      - "best high protein {category} to buy"
+
+  low_calorie:                  # weight management; expected: uncertain
+    category:
+      - "Is {category} good for losing weight?"
+      - "I'm trying to lose 15 pounds. Should {category} be part of my diet?"
+      - "{category} for weight loss"
+    brand:
+      - "Which {category} brand is best for weight loss?"
+      - "I'm counting calories carefully. Which {category} brand gives me the most protein for the fewest calories?"
+      - "lowest calorie {category} brand"
+    purchase:
+      - "I want a low-calorie {category} that still keeps me full. Which one should I buy?"
+      - "I'm on a calorie deficit and need a filling snack. Which {category} should I get?"
+      - "best {category} for weight loss to buy"
+
+  clean_ingredients:            # expected: GC likely strong
+    category:
+      - "Does {category} usually have additives or gums in it?"
+      - "I try to avoid processed foods. Is {category} a clean, minimally processed food?"
+      - "{category} ingredients additives"
+    brand:
+      - "Which {category} brand has the cleanest ingredients?"
+      - "I read every label and want the simplest ingredient list. Which {category} brand fits?"
+      - "{category} brand without gums or thickeners"
+    purchase:
+      - "I want {category} without thickeners or preservatives. What should I buy?"
+      - "I only buy foods with short ingredient lists. Which {category} should I put in my cart?"
+      - "best clean ingredient {category} to buy"
+
+  low_sodium:                   # expected: GC possibly weak (brief example flags 380mg/half cup)
+    category:
+      - "Is {category} high in sodium?"
+      - "My doctor told me to cut back on salt. Can I still eat {category}?"
+      - "{category} sodium content"
+    brand:
+      - "Which {category} brand has the least sodium?"
+      - "I'm watching my blood pressure. Which {category} brand is best for me?"
+      - "low sodium {category} brand"
+    purchase:
+      - "I need a low-sodium {category}. Which one should I buy?"
+      - "I'm limiting salt for my heart health. Which {category} should I get?"
+      - "best low sodium {category} to buy"
+
+  taste_texture:                # expected: uncertain; texture is the main barrier to the category
+    category:
+      - "Why do some people dislike the texture of {category}?"
+      - "I've heard {category} has gotten trendy. Does it actually taste good?"
+      - "{category} taste and texture"
+    brand:
+      - "Which {category} brand tastes the best?"
+      - "I've never liked {category}. Which brand should I try to change my mind?"
+      - "best tasting {category} brand"
+    purchase:
+      - "Which {category} has the best texture? I want to buy one today."
+      - "I don't usually like the texture of {category}. Which one should I buy to give it another try?"
+      - "best texture {category} to buy"
+
+  value:                        # expected: GC possibly weak (premium priced)
+    category:
+      - "Is {category} a cheap source of protein?"
+      - "I'm on a tight grocery budget. Is {category} good value compared to other protein foods?"
+      - "{category} cost per gram of protein"
+    brand:
+      - "What's the best value {category} brand?"
+      - "I'm trying to eat healthy on a tight budget. Which {category} brand gives me the most for my money?"
+      - "best budget {category} brand"
+    purchase:
+      - "What's the cheapest {category} that still tastes good?"
+      - "I need to keep my grocery bill low this week. Which {category} should I buy?"
+      - "cheap {category} worth buying"
+
+  cooking:                      # recipes / baking; expected: uncertain
+    category:
+      - "What can I cook or bake with {category}?"
+      - "I keep seeing {category} recipes online. Is it actually good for cooking?"
+      - "{category} recipes"
+    brand:
+      - "Which {category} brand is best for cooking and baking?"
+      - "I want to make {category} flatbread and protein pancakes. Which brand works best?"
+      - "best {category} brand for recipes"
+    purchase:
+      - "I'm buying {category} to blend into a sauce. Which one should I get?"
+      - "I'm making a {category} recipe tonight. Which one should I buy?"
+      - "best {category} for baking to buy"
+
+  lactose_free:                 # expected: GC has a lactose-free line; main rival is Lactaid
+    category:
+      - "Can lactose-intolerant people eat {category}?"
+      - "Dairy usually upsets my stomach. Is {category} something I can still eat?"
+      - "{category} lactose content"
+    brand:
+      - "What's the best lactose-free {category}?"
+      - "I'm lactose intolerant but want more protein. Which {category} brand should I choose?"
+      - "lactose free {category} brands"
+    purchase:
+      - "I'm lactose intolerant. Which {category} can I buy?"
+      - "I need a {category} that won't upset my stomach. Which one should I buy?"
+      - "lactose free {category} to buy"
+
+  neutral:                      # unprompted demand
+    category:
+      - "Is {category} healthy?"
+      - "Should I start eating {category}? What are the pros and cons?"
+      - "{category} health benefits"
+    brand:
+      - "What's the best {category} brand?"
+      - "I want to start eating {category}. Which brand would you recommend?"
+      - "best {category} brand"
+    purchase:
+      - "What {category} should I buy?"
+      - "I'm going grocery shopping. Which {category} should I get?"
+      - "which {category} to buy"

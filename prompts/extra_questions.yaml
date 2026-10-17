@@ -1,0 +1,29 @@
+# Extra prompts — add a question by adding one entry. No code changes needed.
+#
+# Rules (same as M1):
+#   - Brand-neutral questions: no brand names (put brand comparisons in pilot3.yaml instead).
+#   - Persona = one fact that expresses the need; no age / gender / income / household details.
+#   - `need` groups answers in the summary; reuse an existing need name or invent a new one.
+#   - Use {category} instead of "cottage cheese" so the file works for another brand study.
+#
+# After editing: python -m aibench.cli plan --config configs/goodculture.yaml --modules extra
+
+module: extra
+version: 0.1
+repeats: 3          # times each prompt is asked per engine
+
+prompts:
+  # --- Gut health / live cultures (GC's core claim; missing from M1) ---
+  - {id: U16, need: live_cultures, text: "Which {category} brands have live and active cultures?"}
+  - {id: U18, need: live_cultures, text: "I want a {category} that's good for gut health. What should I buy?"}
+  # --- Store brand vs name brand ---
+  - {id: U23, need: value,         text: "Is store-brand {category} as good as the name brands?"}
+  # --- Kids ---
+  - {id: U28, need: kids,          text: "What's the best {category} for kids?"}
+  - {id: U29, need: kids,          text: "My toddler is a picky eater. Which {category} brand would a kid actually like?"}
+  # --- Channel: who wins inside each retailer (complements the M3 retailer follow-ups) ---
+  - {id: R01, need: retailer_walmart,     text: "What's the best {category} to buy at Walmart?"}
+  - {id: R02, need: retailer_costco,      text: "What's the best {category} to buy at Costco?"}
+  - {id: R03, need: retailer_target,      text: "What's the best {category} to buy at Target?"}
+  - {id: R04, need: retailer_kroger,      text: "What's the best {category} to buy at Kroger?"}
+  - {id: R05, need: retailer_wholefoods,  text: "What's the best {category} to buy at Whole Foods?"}

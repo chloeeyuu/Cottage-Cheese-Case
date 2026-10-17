@@ -1,0 +1,103 @@
+# Targeted probes: short, single-purpose tests that complement the M1 grid and M3 resilience set.
+# Every section is self-contained: `module` is the label stored with each answer (keep it stable —
+# it is part of the cache key, so renaming it would re-collect), `repeats` is per engine.
+#
+#   need_scan      9 one-line need questions      (early scan; superseded by M1, kept for the record)
+#   loyalty        "I usually buy X, should I switch?"  -> stay / switch / mixed
+#   head_to_head   GC vs Daisy, both name orders
+#   h2h_more       GC vs other rivals, both name orders                     (M4)
+#   two_step       category question first, then "which brand?"             (M2, multi-turn)
+#   price_sweep    GC vs Daisy / Mulu at hypothetical shelf prices          (M5)
+#   mulu_price     how much more must Mulu cost before GC wins back?        (M5 extension)
+#   regions        "I live in <region>…" — do regional brands get a home advantage?
+#
+# Label facts used in price prompts: data/reference/product_labels.csv. Prices are HYPOTHETICAL.
+
+need_scan:
+  module: pilot_need
+  repeats: 3
+  prompts:
+    protein:           "Which {category} brand has the most protein?"
+    low_calorie:       "Which {category} brand is best for weight loss?"
+    clean_ingredients: "Which {category} brand has the cleanest ingredients?"
+    low_sodium:        "Which {category} brand has the least sodium?"
+    taste_texture:     "Which {category} brand tastes the best?"
+    value:             "What's the best value {category} brand?"
+    cooking:           "Which {category} brand is best for cooking and baking?"
+    lactose_free:      "What's the best lactose-free {category}?"
+    neutral:           "What's the best {category} brand?"
+
+loyalty:
+  module: pilot_loyalty
+  repeats: 3
+  brands: [Good Culture, Daisy, Kirkland]
+  conditions:
+    baseline: "I usually buy {brand} {category}. Should I stick with it?"
+    price:    "I usually buy {brand} {category}, but I'm on a tight budget. Should I switch?"
+    protein:  "I usually buy {brand} {category}, but I want more protein. Should I switch?"
+    walmart:  "I usually buy {brand} {category}, but I shop at Walmart. Should I switch?"
+
+head_to_head:
+  module: pilot_h2h
+  repeats: 3
+  prompts:
+    gc_first:    "Which is better, Good Culture or Daisy {category}?"
+    daisy_first: "Which is better, Daisy or Good Culture {category}?"
+
+h2h_more:
+  module: pilot_h2h_more
+  repeats: 3
+  pairs:                          # each asked in both name orders
+    mulu:         ["Good Culture", "Mulu"]
+    kirkland:     ["Good Culture", "Kirkland Signature"]
+    breakstones:  ["Good Culture", "Breakstone's"]
+    friendship:   ["Good Culture", "Friendship Dairies"]
+    lactaid:      ["Good Culture Lactose Free", "Lactaid"]
+  template: "Which is better, {a} or {b} {category}?"
+  lactaid_template: "I'm lactose intolerant. Which is better, {a} or {b} {category}?"
+
+two_step:
+  module: pilot_m2
+  repeats: 3                      # turn 2 is sent after the engine's real turn-1 answer
+  pairs:
+    weight:  ["Is {category} a good snack for weight management?", "Which brand should I buy?"]
+    protein: ["Is {category} a good source of protein for building muscle?", "Which brand should I buy?"]
+    health:  ["Is {category} healthy?", "Which brand should I buy?"]
+
+# Shared by price_sweep and mulu_price.
+store_choice_template: &store_choice |-
+  I'm at the store choosing between two 16 oz tubs of {category}:
+  - {a}
+  - {b}
+  Which one should I buy? Please pick one.
+
+products:
+  gc:    "Good Culture 2% (${price}): 14g protein per 1/2 cup; ingredients: skim milk, whole milk, cream, sea salt, live and active cultures."
+  daisy: "Daisy 4% (${price}): 13g protein per 1/2 cup; ingredients: cultured skim milk, cream, salt."
+  mulu:  "MULU 2% (${price}): 18g protein per 1/2 cup; made with an added whey-and-casein protein blend."
+
+price_sweep:
+  module: pilot_m5
+  repeats: 2
+  template: *store_choice
+  scenarios:                      # GC price varies; rival fixed at its observed shelf price
+    - {rival: daisy, rival_price: "3.97", gc_price: "3.97", gap: "0%"}
+    - {rival: daisy, rival_price: "3.97", gc_price: "4.23", gap: "6.5% (observed, Walmart)"}
+    - {rival: daisy, rival_price: "3.97", gc_price: "5.16", gap: "30%"}
+    - {rival: mulu,  rival_price: "4.26", gc_price: "4.23", gap: "-0.7% (observed)"}
+
+mulu_price:
+  module: pilot_mulu_price
+  repeats: 2
+  template: *store_choice
+  gc_price: "4.23"                # GC fixed at observed price; Mulu varies
+  mulu_prices: {"+10%": "4.65", "+25%": "5.29", "+50%": "6.35"}
+
+regions:
+  module: pilot_region
+  repeats: 3
+  areas: {east: "on the East Coast", south: "in the South", west: "on the West Coast",
+          north: "in the Pacific Northwest", central: "in the Midwest"}
+  questions:
+    neutral: "I live {area}. What {category} should I buy?"
+    protein: "I live {area}. Which {category} brand has the most protein?"

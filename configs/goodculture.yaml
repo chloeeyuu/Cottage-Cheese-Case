@@ -1,0 +1,57 @@
+# The only file that changes when a new brand is swapped in.
+run_name: goodculture
+focal_brand: Good Culture
+category: cottage cheese
+
+sales_baseline: data/reference/circana_cottage_cheese.csv   # brand, dollar_sales_musd, units_m, period, source
+product_labels: data/reference/product_labels.csv
+
+prompts:
+  m1: prompts/m1_need_journey.yaml
+  m3: prompts/m3_pushback_resilience.yaml
+  probes: prompts/targeted_probes.yaml
+  extra: prompts/extra_questions.yaml
+
+# Brand dictionary: aliases (lowercase) are matched in answers; owned_domains feed owned-source dependency.
+brands:
+  Good Culture:  {aliases: ["good culture", "goodculture"], owned_domains: [goodculture.com], oi_group: Good Culture}
+  Daisy:         {aliases: ["daisy brand", "daisy"], owned_domains: [daisybrand.com], oi_group: Daisy}
+  Breakstone's:  {aliases: ["breakstone's", "breakstones", "breakstone"], owned_domains: [breakstones.com], oi_group: Lactalis}
+  Knudsen:       {aliases: ["knudsen"], owned_domains: [], oi_group: Lactalis}
+  Kemps:         {aliases: ["kemps"], owned_domains: [kemps.com], oi_group: Kemps}
+  Darigold:      {aliases: ["darigold"], owned_domains: [darigold.com], oi_group: Darigold}
+  Lactaid:       {aliases: ["lactaid"], owned_domains: [lactaid.com], oi_group: null}
+  Mulu:          {aliases: ["mulu"], owned_domains: [], oi_group: null}
+  Hood:          {aliases: ["hood cottage", "hp hood"], owned_domains: [hood.com], oi_group: null}
+  Friendship:    {aliases: ["friendship dairies", "friendship"], owned_domains: [friendshipdairies.com], oi_group: null}
+  Nancy's:       {aliases: ["nancy's", "nancys", "nancy's probiotics"], owned_domains: [nancysyogurt.com], oi_group: null}
+  Prairie Farms: {aliases: ["prairie farms"], owned_domains: [prairiefarms.com], oi_group: null}
+  Organic Valley: {aliases: ["organic valley"], owned_domains: [organicvalley.coop], oi_group: null}
+  Kalona:        {aliases: ["kalona", "kalona supernatural"], owned_domains: [kalonasupernatural.com], oi_group: null}
+  Hiland:        {aliases: ["hiland"], owned_domains: [hilanddairy.com], oi_group: null}
+  Muuna:         {aliases: ["muuna"], owned_domains: [muuna.com], oi_group: null}
+  Private label:
+    aliases: ["kirkland", "kirkland signature", "good & gather", "good and gather", "great value", "365 by whole foods",
+              "whole foods 365", "kroger brand", "simple truth", "store brand", "private label",
+              "trader joe's", "trader joes", "lucerne", "friendly farms", "wegmans", "roundy's", "president's choice",
+              "market pantry", "hill country fare", "signature select", "o organics", "food club"]
+    owned_domains: []
+    oi_group: Private label
+
+# Head-to-head rivals and seeded brands live in the prompt files (targeted_probes.yaml, m3_pushback_resilience.yaml).
+
+engines:
+  openai:    {model: gpt-6-luna, web_search: true}   # ChatGPT Free default since Oct 8, 2026
+  gemini:    {model: gemini-3.5-flash-lite, web_search: true}   # 2.5 Flash-Lite closed to new users; app free tier = Flash-Lite (version unpublished)
+  anthropic: {model: claude-sonnet-5-5, web_search: true, web_search_tool: web_search_20250305, max_searches: 5}
+
+# Two LLM judges code every answer with the same rules (src/aibench/judge.py).
+#   qwen  - open-weight, different family from every engine scored; reasoning on; host pinned for reproducibility
+#   haiku - independent check; agreement with qwen: top-pick kappa 0.84 on all 1,596 answers
+judges:
+  qwen:  {backend: openrouter, model: qwen/qwen3.8-27b, reasoning: true, provider: ModelRun}
+  haiku: {backend: anthropic, model: claude-haiku-5-5}
+primary_judge: qwen   # the coding that `summary` reports
+
+repeats: {m1: 5}   # other modules set repeats in their prompt file
+min_n: 20          # cells below this are shown but not interpreted
