@@ -511,9 +511,7 @@ const INV = {confidence: "Reason for confidence", risk: "Risk to diligence", que
 function invest(list) { return list && list.length ? `<div class="inv"><div class="inv-h">For the investment case</div>${list.map(i => `<div class="inv-row"><span class="itag ${i.type}">${INV[i.type]}</span><p>${esc(i.text)}</p></div>`).join("")}</div>` : ""; }
 function renderFindings() {
   const view = f => `<div class="views"><div class="view own"><div class="vh">For an existing investor</div>${f.existing_h ? `<h3>${esc(f.existing_h)}</h3>` : ""}<p>${esc(f.existing)}</p></div><div class="view pro"><div class="vh">For a prospective investor</div>${f.prospective_h ? `<h3>${esc(f.prospective_h)}</h3>` : ""}<p>${esc(f.prospective)}${f.prospective_src ? ` <a class="isrc" href="${esc(f.prospective_src[1])}" target="_blank" rel="noopener">(Source: ${esc(f.prospective_src[0])})</a>` : ""}</p></div></div>`;
-  const tr = F.track, bt = F.bottom;
-  const track = tr ? `<div class="story"><div style="grid-column:1/-1"><h2>What to Track Each Quarter</h2><p class="lede">${esc(tr.intro)}</p>
-      <div class="trackgrid">${tr.steps.map((s, i) => `<div class="tstep"><div class="tn">${i + 1}</div><h3>${esc(s.t)}</h3><p>${esc(s.d)}</p><div class="tlinks">${s.dims.map(dm => `<button class="linkbtn" data-dim="${dm}">${esc((F.dimensions.find(x => x.id === dm) || {}).name || dm)}</button>`).join("")}</div></div>`).join("")}</div></div></div>` : "";
+  const bt = F.bottom;
   $("#tab-findings").innerHTML = `
     <div class="kpis">${F.kpis.map(k => `<div class="kpi${k.risk ? " risk" : ""}"><div class="v">${esc(k.value)}</div><div class="l">${esc(k.label)}</div><div class="s">${esc(k.sub)}</div></div>`).join("")}</div>
     ${bt ? `${bt.verdict ? `<p class="verdict">${esc(bt.verdict)}</p>` : ""}` : ""}
