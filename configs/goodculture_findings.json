@@ -1,0 +1,819 @@
+{
+  "title": "Good Culture Through AI Answer Engines",
+  "subtitle": "How ChatGPT, Gemini and Claude recommend cottage cheese brands: where Good Culture wins, who it loses to, how its position holds up, and what shapes it",
+  "asof": "October 2026",
+  "kpis": [
+    {
+      "value": "46%",
+      "label": "of brand questions end with Good Culture as the top pick",
+      "sub": "Consistent across engines: ChatGPT 43%, Gemini 52% and Claude 44%",
+      "metric": "tps"
+    },
+    {
+      "value": "6 of 9",
+      "label": "consumer needs where Good Culture is the top pick",
+      "sub": "Leads cooking, everyday use, taste, low-calorie, lactose-free and clean-ingredient questions. Loses value to store brands and low sodium to Friendship, and protein to Mulu on Gemini and Claude.",
+      "metric": "tps"
+    },
+    {
+      "value": "78%",
+      "label": "still recommend Good Culture after \"would you still pick it over Daisy?\"",
+      "sub": "Daisy, the category leader, keeps only 11% when challenged with Good Culture",
+      "metric": "pushback"
+    },
+    {
+      "value": "+6.5%",
+      "label": "price premium over Daisy the engines still accept",
+      "sub": "At +30%, they switch to Daisy in 11 of 12 answers",
+      "metric": "price"
+    },
+    {
+      "value": "28%",
+      "label": "of protein questions pick Good Culture, against 58% for Mulu (led by Gemini and Claude)",
+      "sub": "Once a consumer says money is tight, only 6% still recommend Good Culture",
+      "metric": "tps",
+      "risk": true
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "default",
+      "group": "Reach",
+      "name": "Default Recommendation",
+      "question": "Who does AI recommend when the consumer names no brand?",
+      "value": "46% · 4.2×",
+      "status": "good",
+      "note": "Good Culture is the top pick in 46% of brand and purchase questions, 4.2× its 11% share of dollar sales. No rival reaches half its sales share (Daisy 0.4×, store brands 0.3×).",
+      "measures": "How often each brand is the AI's top pick when the consumer names no brand, compared with its share of real sales.",
+      "how": "54 brand and purchase questions such as \"What cottage cheese should I buy?\", asked twice on each engine. Also a two-step version: \"Is cottage cheese healthy?\", then \"Which brand should I buy?\"",
+      "metric": "tps"
+    },
+    {
+      "id": "needs",
+      "group": "Reach",
+      "name": "Consumer Need Coverage",
+      "question": "In how many consumer needs does it lead?",
+      "value": "6 of 9",
+      "status": "good",
+      "note": "Good Culture leads six of nine needs. Its lead is strongest in cooking, general and taste questions, and narrowest in clean ingredients, where Daisy runs close behind. It loses the other three: protein to Mulu on Gemini and Claude (ChatGPT still favors Good Culture), while value (budget) and low-sodium questions go almost entirely to store brands and Friendship.",
+      "measures": "Which brand the AI picks for each of nine consumer needs, such as protein, value or low sodium.",
+      "how": "Six questions per need, e.g. \"Which cottage cheese brand has the most protein?\" Each cell is the share of answers naming that brand.",
+      "metric": "tps"
+    },
+    {
+      "id": "pushback",
+      "group": "Resilience",
+      "name": "Pushback Resilience",
+      "question": "Does the recommendation survive a follow-up?",
+      "value": "78% vs. rival · 6% on budget",
+      "status": "warning",
+      "note": "Good Culture holds firmly when a rival is named, far better than Daisy or the store brand. It holds moderately when the consumer mentions a store or region, weakens sharply when texture matters most, and collapses when budget or protein comes up, where every premium brand loses.",
+      "measures": "Whether a recommendation survives one follow-up user question prompt.",
+      "how": "The first reply is fixed (\"I'd recommend [brand]. It's a solid choice.\"), then the consumer pushes back, e.g. \"What if I'm on a tight budget?\" Bars show the share still recommending the same brand.",
+      "metric": "pushback"
+    },
+    {
+      "id": "loyalty",
+      "group": "Resilience",
+      "name": "Loyalty Defense",
+      "question": "\"I usually buy it. Should I switch?\"",
+      "value": "100% stay → 0% on budget",
+      "status": "warning",
+      "note": "With no pressure, every engine tells buyers of all three brands to stay. On a tight budget, Good Culture and Daisy buyers are steered almost entirely to store brands, while store-brand buyers mostly stay. For more protein, the AI usually suggests trying Mulu alongside Good Culture rather than switching. At Walmart, it mostly hedges between keeping Good Culture and trying the store brand, Great Value.",
+      "measures": "Whether the AI tells an existing buyer to stay with their brand.",
+      "how": "\"I usually buy [brand]. Should I stick with it?\", with and without a pressure such as a tight budget, wanting more protein, or shopping at Walmart.",
+      "metric": "loyalty"
+    },
+    {
+      "id": "h2h",
+      "group": "Resilience",
+      "name": "Head-to-Head",
+      "question": "Asked to choose between two named brands, who wins?",
+      "value": "wins 31% · loses 1%",
+      "status": "good",
+      "note": "Good Culture almost never loses outright (once, to Daisy), but it rarely wins outright either: most answers say \"it depends\". It wins most often against Lactaid and Friendship, sometimes against Breakstone's and Mulu, rarely against Daisy, and never against Kirkland, where every answer hedges. Name order barely matters.",
+      "measures": "When the consumer names Good Culture and one rival, which brand the AI declares better: Good Culture, the rival, or neither (\"it depends\"). Each pair is also asked in reverse order to check that the brand named first has no built-in advantage.",
+      "how": "\"Which is better, Good Culture or Mulu cottage cheese?\", asked in both name orders for six rivals.",
+      "metric": "h2h"
+    },
+    {
+      "id": "price",
+      "group": "Pricing power",
+      "name": "Price Headroom",
+      "question": "How does the price gap change the AI's pick?",
+      "value": "+6.5% ok · +30% lost",
+      "status": "warning",
+      "note": "Good Culture holds its real 6.5% premium over Daisy comfortably but loses almost every answer at 30%. Against Mulu it has no price cushion: at equal prices the vote splits, and Good Culture only wins outright once Mulu costs about a quarter more.",
+      "measures": "How the AI's choice shifts with price: how large a premium over Daisy Good Culture can carry, and how much more Mulu must cost before the AI returns to Good Culture.",
+      "how": "Two 16 oz tubs with real label facts (Good Culture 2%: 14 g protein, Daisy 4%: 13 g, Mulu 2%: 18 g with added protein) and set prices, e.g. \"Good Culture 2% ($5.16)… Daisy 4% ($3.97)… which should I buy?\" Both name orders asked.",
+      "metric": "price"
+    },
+    {
+      "id": "channel",
+      "group": "Context",
+      "name": "Channel & Region",
+      "question": "In which stores and regions does it win?",
+      "value": "Whole Foods 89% · Walmart 33%",
+      "status": "critical",
+      "note": "Good Culture dominates premium grocers (Whole Foods, Target), wins about half of Costco and Kroger answers, and loses Walmart to the store brand Great Value. By region, it leads in four of five regions, with only the Pacific Northwest favouring local Darigold.",
+      "measures": "Which brand the AI recommends when the consumer names the store they shop at or the region they live in.",
+      "how": "\"What's the best cottage cheese to buy at Walmart?\" for five stores, and \"I live in the Midwest. What should I buy?\" for five regions.",
+      "metric": "tps"
+    },
+    {
+      "id": "perception",
+      "group": "Narrative",
+      "name": "Brand Perception",
+      "question": "How positively does the AI talk about each brand, and which traits does it attach to them?",
+      "value": "most positive · most \"pricey\"",
+      "status": "good",
+      "note": "The AI describes Good Culture more positively than any rival and almost never negatively. Its image rests on clean ingredients, live cultures, creaminess and taste, but it is also the brand most often called pricey. Each rival owns one trait: Mulu protein, store brands low price, and Daisy a clean label it shares with Good Culture.",
+      "measures": "How the AI describes each brand when it mentions it.",
+      "how": "The judge model (Qwen) reads every answer and gives each brand mention a sentiment score from −2 (strongly negative) to +2 (strongly positive), plus tags such as \"pricey\" or \"high protein\".",
+      "metric": "perception"
+    },
+    {
+      "id": "sources",
+      "group": "Narrative",
+      "name": "Source Control",
+      "question": "Where does the AI get its information about Good Culture, and does it get the facts right?",
+      "value": "Claude: 10% owned · 9% accurate",
+      "status": "critical",
+      "note": "Good Culture's nutrition facts are stated correctly only where the AI reads goodculture.com. ChatGPT cites the brand's site in 37% of brand questions and matches the label on calories (88%) and sodium (100%). Claude cites it in 10%, draws instead on media roundups such as AOL and Yahoo, and mostly gives wrong figures (80 kcal, 340 mg). Gemini leans on Reddit and media and rarely states calories or sodium at all. Protein is right on every engine, likely because 14 g appears on nearly every listing.",
+      "measures": "Whether the AI reads the brand's own website, and states its facts correctly.",
+      "how": "The share of answers citing goodculture.com, and whether stated calories, sodium and protein match the label (90 kcal, 380 mg, 14 g per ½ cup)."
+    }
+  ],
+  "price_points": {
+    "daisy": {
+      "label": "vs. Daisy (GC price varies)",
+      "points": {
+        "0%": 0,
+        "6.5% (observed, Walmart)": 6.5,
+        "30%": 30
+      },
+      "title": "Good Culture vs. Daisy (Good Culture's price varies)",
+      "labels": {
+        "0%": "Same price",
+        "6.5% (observed, Walmart)": "Good Culture 6.5% pricier",
+        "30%": "Good Culture 30% pricier"
+      },
+      "real": "6.5% (observed, Walmart)",
+      "order": [
+        "0%",
+        "6.5% (observed, Walmart)",
+        "30%"
+      ],
+      "xprice": {
+        "0%": 3.97,
+        "6.5% (observed, Walmart)": 4.23,
+        "30%": 5.16
+      },
+      "xlabel": "Good Culture's price →",
+      "fixed": "Daisy fixed at $3.97",
+      "short": "vs. Daisy"
+    },
+    "mulu": {
+      "label": "vs. Mulu (Mulu price varies)",
+      "points": {
+        "-0.7% (observed)": -0.7,
+        "MULU +10%": -9.0,
+        "MULU +25%": -20.0,
+        "MULU +50%": -33.4
+      },
+      "title": "Good Culture vs. Mulu (Mulu's price varies)",
+      "labels": {
+        "-0.7% (observed)": "Same price",
+        "MULU +10%": "Mulu 10% pricier",
+        "MULU +25%": "Mulu 25% pricier",
+        "MULU +50%": "Mulu 50% pricier"
+      },
+      "real": "-0.7% (observed)",
+      "order": [
+        "-0.7% (observed)",
+        "MULU +10%",
+        "MULU +25%",
+        "MULU +50%"
+      ],
+      "xprice": {
+        "-0.7% (observed)": 4.26,
+        "MULU +10%": 4.65,
+        "MULU +25%": 5.29,
+        "MULU +50%": 6.35
+      },
+      "xlabel": "Mulu's price →",
+      "fixed": "Good Culture fixed at $4.23",
+      "short": "vs. Mulu"
+    }
+  },
+  "rival_names": {
+    "daisy": "Daisy",
+    "mulu": "Mulu",
+    "kirkland": "Kirkland",
+    "breakstones": "Breakstone's",
+    "friendship": "Friendship",
+    "lactaid": "Lactaid (lactose-free)"
+  },
+  "retailers": {
+    "R01": "Walmart",
+    "R02": "Costco",
+    "R03": "Target",
+    "R04": "Kroger",
+    "R05": "Whole Foods"
+  },
+  "engines_intro": "Most people use AI assistants without paying: only about 5% of ChatGPT's roughly 900 million weekly users have a paid subscription. The study therefore tests the default model on each assistant's free tier, called through its API with web search on and no adjusted system prompt.",
+  "engines": [
+    {
+      "id": "openai",
+      "app": "ChatGPT",
+      "model": "gpt-6-luna",
+      "tier": "Default model for free users since 8 October 2026.",
+      "share": "46.4% of AI-assistant usage and 1.1 billion monthly users (Sensor Tower, May 2026).",
+      "pros": [
+        "Largest audience (46% of usage)",
+        "Reads brand sites, so its facts are the most accurate"
+      ],
+      "cons": [
+        "Few citations, so its reasoning is hard to trace",
+        "New model, still rolling out"
+      ],
+      "sources": [
+        [
+          "OpenAI Free/Go/Plus models after GPT-6 (Developers Digest)",
+          "https://www.developersdigest.tech/blog/chatgpt-free-vs-go-vs-plus-gpt-6-2026"
+        ]
+      ]
+    },
+    {
+      "id": "gemini",
+      "app": "Gemini",
+      "model": "gemini-3.5-flash-lite",
+      "tier": "The only model for free users since 9 October 2026.",
+      "share": "27.7% of usage and 662 million monthly users (Sensor Tower, May 2026).",
+      "pros": [
+        "Second-largest audience",
+        "Grounded in Google Search and free to run"
+      ],
+      "cons": [
+        "Lightest model, leans on Reddit and Facebook",
+        "Sources visible at the site level only"
+      ],
+      "sources": [
+        [
+          "Gemini app limits free users to Flash-Lite (9to5Google, 3 Oct 2026)",
+          "https://9to5google.com/2026/10/03/gemini-model-limits-oct-26/"
+        ]
+      ]
+    },
+    {
+      "id": "anthropic",
+      "app": "Claude",
+      "model": "claude-sonnet-5-5",
+      "tier": "Default model for free users since late September 2026.",
+      "share": "10.3% of usage and 245 million monthly users (Sensor Tower, May 2026).",
+      "pros": [
+        "Mid-size model that names its sources",
+        "Shows where evidence is split (\"it depends\")"
+      ],
+      "cons": [
+        "Smallest audience (10% of usage)",
+        "Rarely cites the brand's site and repeats outdated nutrition facts"
+      ],
+      "sources": [
+        [
+          "Claude Sonnet 5.5 is available on the free plan (Notebookcheck, 30 Sep 2026)",
+          "https://www.notebookcheck.net/Claude-Sonnet-5-5-is-available-on-the-free-plan-unlike-Opus-5-5.1411941.0.html"
+        ]
+      ]
+    }
+  ],
+  "engines_share_source": [
+    "ChatGPT's market share slips below 50% for first time (TechCrunch, 16 Jun 2026, citing Sensor Tower)",
+    "https://techcrunch.com/2026/06/16/chatgpts-market-share-slips-below-50-for-first-time/"
+  ],
+  "engines_excluded": "Not covered: Google AI Overviews and AI Mode, Microsoft Copilot, Meta AI, Perplexity and Grok, each under 5% of assistant usage in the same report. The pipeline accepts another engine as one more adapter.",
+  "engines_intro_source": [
+    "The Decoder, citing The Information, January 2026",
+    "https://the-decoder.com/only-5-percent-of-chatgpts-900-million-weekly-users-pay-and-reportedly-most-arent-worth-much-to-advertisers/"
+  ],
+  "flow": [
+    [
+      "Set up the study",
+      "Rival brands, product attributes, consumer needs"
+    ],
+    [
+      "Build the prompts",
+      "Consumer questions by need, stage and phrasing, asked 532 times per engine"
+    ],
+    [
+      "Query three AI engines",
+      "ChatGPT, Gemini and Claude via API, web search on"
+    ],
+    [
+      "Score each conversation",
+      "An independent judge model (Qwen) records the brand picked and how each brand is described"
+    ],
+    [
+      "Calculate the metrics",
+      "Top-pick share, pushback retention, price headroom and more"
+    ],
+    [
+      "Analyze",
+      "Compare brands, engines, needs and stores"
+    ],
+    [
+      "Publish",
+      "This page, plus code and data on GitHub"
+    ]
+  ],
+  "asked": {
+    "rules": [
+      "Questions never name a brand, except in the tests that deliberately compare named brands.",
+      "When a question describes the consumer, it gives one fact about the need (for example, \"I lift weights four times a week\") and nothing else, such as age, location or store, so these cannot sway the answer."
+    ],
+    "needs": [
+      "General",
+      "Protein",
+      "Low calorie",
+      "Taste & texture",
+      "Clean ingredients",
+      "Value",
+      "Lactose-free",
+      "Low sodium",
+      "Cooking"
+    ],
+    "stages": [
+      [
+        "Learning",
+        "about the category, no brand asked for"
+      ],
+      [
+        "Choosing",
+        "a brand"
+      ],
+      [
+        "Buying",
+        "at the store"
+      ]
+    ],
+    "phrasings": [
+      [
+        "Plain question",
+        "a direct question"
+      ],
+      [
+        "Personal",
+        "one sentence about the consumer's need, then the question"
+      ],
+      [
+        "Search-style",
+        "short keywords, as typed into a search box"
+      ]
+    ],
+    "example_need": "Protein",
+    "example_grid": [
+      [
+        "Is cottage cheese a good source of protein for building muscle?",
+        "I'm trying to hit 140g of protein a day. Is cottage cheese worth adding to my diet?",
+        "cottage cheese protein benefits"
+      ],
+      [
+        "Which cottage cheese brand has the most protein?",
+        "I lift weights four times a week. What's the best cottage cheese for me?",
+        "highest protein cottage cheese brand"
+      ],
+      [
+        "I'm at the grocery store and want a high-protein cottage cheese. Which one should I grab?",
+        "I want a post-workout snack with lots of protein. Which cottage cheese should I buy?",
+        "best high protein cottage cheese to buy"
+      ]
+    ],
+    "grid_note": "9 needs × 3 stages × 3 phrasings = 81 questions, each asked twice on each engine. The Dashboard's top-pick figures use the Choosing and Buying stages.",
+    "tests": [
+      [
+        "Two-step",
+        "\"Is cottage cheese healthy?\", then \"Which brand should I buy?\" (also weight management and muscle building)",
+        "Does a general question turn into a brand pick?"
+      ],
+      [
+        "Pushback",
+        "The first reply is fixed (\"I'd recommend Good Culture. It's a solid choice.\"), then the consumer asks \"What if I'm on a tight budget?\" (also texture, protein, store, region, rival and a neutral follow-up)",
+        "Does the recommendation hold?"
+      ],
+      [
+        "Loyalty",
+        "\"I usually buy Good Culture, but I'm on a tight budget. Should I switch?\" (also no pressure, more protein and shopping at Walmart, for Daisy and Kirkland too)",
+        "Does AI keep existing buyers?"
+      ],
+      [
+        "Head-to-head",
+        "\"Which is better, Good Culture or Mulu cottage cheese?\" (also Daisy, Kirkland, Breakstone's, Friendship and Lactaid, in both name orders)",
+        "Who wins a direct comparison?"
+      ],
+      [
+        "Price",
+        "Two 16 oz tubs with real label facts and set prices: \"Good Culture 2% ($5.16)… Daisy 4% ($3.97)… which one should I buy?\" (also equal and observed prices, and Mulu at four prices)",
+        "How much more can it cost?"
+      ],
+      [
+        "Regions",
+        "\"I live in the Midwest. What cottage cheese should I buy?\" (also East Coast, South, West Coast and Pacific Northwest, plus a protein version)",
+        "Do regional brands get a home advantage?"
+      ],
+      [
+        "Retailer",
+        "\"What's the best cottage cheese to buy at Walmart?\" (also Costco, Target, Kroger, Whole Foods)",
+        "Who wins inside each store?"
+      ],
+      [
+        "Other needs",
+        "\"What's the best cottage cheese for kids?\" (also gut health, store brand vs. name brand)",
+        "Who wins needs outside the main grid?"
+      ]
+    ]
+  },
+  "eyebrow": [
+    "AI Answer-Engine Benchmark",
+    "Good Culture Case Study",
+    "Kefan (Chloe) Yu",
+    "October 2026"
+  ],
+  "rival_why": [
+    [
+      "Daisy",
+      "Largest named brand (21% of sales)"
+    ],
+    [
+      "Kirkland",
+      "Stands in for store brands (32% of sales)"
+    ],
+    [
+      "Breakstone's",
+      "Owned by Lactalis, a large dairy company"
+    ],
+    [
+      "Mulu",
+      "New high-protein brand from a large dairy co-op (DFA)"
+    ],
+    [
+      "Friendship",
+      "Frequent AI pick for low sodium"
+    ],
+    [
+      "Lactaid",
+      "Lactose-free specialist"
+    ]
+  ],
+  "region_names": {
+    "east": "East Coast",
+    "south": "South",
+    "west": "West Coast",
+    "north": "Pacific Northwest",
+    "central": "Midwest"
+  },
+  "track": {
+    "intro": "The same benchmark can be rerun each quarter. Five measures from this study carry the most signal:",
+    "items": [
+      "Top-pick share and its ratio to sales share: is the AI lead growing or shrinking?",
+      "The leader of each consumer need, especially protein and clean label: is a rival spreading beyond one need?",
+      "Retention when a rival is named, and the price gap at which engines switch: is pricing power holding?",
+      "Own-site citation and label accuracy per engine: are the fixes to product facts working?",
+      "The share of top picks citing The Kitchn: is the evidence base widening?"
+    ]
+  },
+  "bottom": {
+    "verdict": "AI engines already treat Good Culture as the category default, well ahead of its sales. The open question is whether it can hold that position where larger dairy brands compete: protein, price and reach.",
+    "existing_h": "Turn AI Recommendations Into Sales",
+    "existing": "The engines recommend Good Culture more than four times as often as its sales share would predict. Three moves could widen that lead, from cheapest to hardest. First, widen the evidence base: detailed product pages and more independent reviews, so every engine quotes the label correctly and no single ranking carries the recommendation. Second, reach budget-minded consumers with a value format, such as a larger tub, and wider distribution in mass retail. Third, choose a clear position: either one claim the engines tie to Good Culture alone, such as cooking, or the best all-round choice that also closes the protein gap. Rerunning this benchmark each quarter would show whether each move changes what the engines recommend.",
+    "prospective_h": "Strong Demand Signal, Contestable Lead",
+    "prospective": "The AI preference matches Good Culture's reported growth, about six times the category rate in 2024, which supports the demand case. The lead rests on taste, texture and cooking, and holds against Daisy, the category leader. It is also contestable. AI answers do not follow sales size: Good Culture ranks fourth in dollar sales but first in answers, Mulu leads protein on two engines without appearing in sales figures, and nearly half of Good Culture's top picks rest on one review. Three points need diligence: whether recommendations turn into repeat purchases, how far pricing power goes (a premium holds over Daisy, not over Mulu at equal prices), and how management would compete with a larger rival on protein, budget and mass retail."
+  },
+  "findings": [
+    {
+      "id": "wins",
+      "dim": "default",
+      "title": "Most Recommended Brand, Well Above Its Sales Share",
+      "body": "Good Culture is the top pick on all three engines, at more than four times its share of dollar sales. Daisy, the category leader, is named in a similar share of answers (64% vs. 81%) but recommended in 8%. The engines cite Good Culture's taste and texture, most often pointing to The Kitchn's test of 22 brands, which named Good Culture's whole-milk cottage cheese the best. At product level, they name the 2% and 4% tubs about equally. Snack cups and flavored lines are rarely mentioned.",
+      "quote": {
+        "text": "My default pick: Good Culture 2%. It's thick and creamy, and the label lists 14 g of protein per ½ cup.",
+        "who": "ChatGPT, asked \"What cottage cheese should I buy?\""
+      },
+      "prospective": "The AI lead lines up with reported growth: SPINS data had Good Culture growing about six times faster than the category in 2024. Repeat-purchase data would confirm whether being recommended turns into retained buyers.",
+      "existing": "The engines' case for Good Culture rests on independent reviews, led by The Kitchn's test. New reviews and taste tests keep that evidence current. Snack cups and flavored lines rarely appear in answers, so if they matter to growth, they need their own reviews and product pages.",
+      "sources": [
+        [
+          "Dollar-sales share: Circana via Dairy Foods (52 weeks to Feb 2026)",
+          "https://www.dairyfoods.com/articles/99101-cottage-cheese-sales-top-2-billion"
+        ],
+        [
+          "SPINS growth figures via Nosh (2024)",
+          "https://www.nosh.com/news/2024/active-culture-appeal-how-cottage-cheese-is-keeping-its-cool"
+        ]
+      ],
+      "existing_h": "Keep the Evidence Fresh",
+      "prospective_h": "Check That Recommendations Convert",
+      "prospective_src": [
+        "SPINS data via Nosh, 2024",
+        "https://www.nosh.com/news/2024/active-culture-appeal-how-cottage-cheese-is-keeping-its-cool"
+      ]
+    },
+    {
+      "id": "pillars",
+      "dim": "needs",
+      "title": "Leads on Taste and Everyday Use, Contested on Protein and Clean Label",
+      "body": "Good Culture is the top pick for taste and texture, cooking and everyday use on all three engines, at about three-quarters of answers, and also leads low-calorie and lactose-free questions. Two of its marketed benefits are contested. On protein, Mulu, made by the dairy cooperative DFA with 18 g per ½ cup, leads on Gemini and Claude, while ChatGPT still favors Good Culture (7 of 12 answers). Good Culture markets protein as a benefit, and its CEO calls cottage cheese \"a protein powerhouse\", but its tubs carry the category-standard 14 g and it has not claimed the most protein. On clean ingredients, Daisy leads on ChatGPT (8 of 12), while Gemini and Claude favor Good Culture. Nancy's leads half of ChatGPT's live-culture questions (small sample). Value and low-sodium questions go to store brands and Friendship on every engine.",
+      "prospective": "Good Culture's lead is broad, covering six of nine needs, but its most common description, clean ingredients, is shared with Daisy, and protein, the most promoted benefit in the category, already goes to Mulu on Gemini and Claude. A broad lead without a distinct claim may be easier for a well-funded rival to erode one need at a time. A useful question for management is which position the growth plan relies on, a single owned claim or the all-round choice.",
+      "existing": "Good Culture leads six of nine consumer needs, so the engines already treat it as the well-rounded choice, but they describe it in the same terms as Daisy, led by clean ingredients. Two paths could probably work. One is to own a single clear claim, as Mulu does with protein, for example cooking, where Good Culture already leads on every engine. The other is to position Good Culture as the best all-round choice, keeping its lead on taste and everyday use while closing the gaps on protein and, on ChatGPT, clean label.",
+      "sources": [
+        [
+          "CEO on protein, SupplySide (2025)",
+          "https://www.supplysidefbj.com/food-ingredients/brands-reinvent-cottage-cheese-as-high-protein-superfood-for-new-generation"
+        ],
+        [
+          "Launch positioning, FoodNavigator (2016)",
+          "https://www.foodnavigator.com/Article/2016/10/04/Good-Culture-repositions-cottage-cheese-as-on-the-go-protein-source/"
+        ]
+      ],
+      "existing_h": "Specialist or All-Rounder",
+      "prospective_h": "Broad Lead, Thin Differentiation"
+    },
+    {
+      "id": "holds",
+      "dim": "pushback",
+      "title": "Holds Against Named Rivals, Weaker on Price, Protein and Mass Retail",
+      "body": "The follow-up tests reflect what a larger brand might do: present itself as the alternative, compete on price, lead on protein and expand in mass retail. Against named rivals, Good Culture's position is stable. It loses one of 108 head-to-heads, and most recommendations survive a challenge from Daisy. On price, there is no cushion against Mulu: at equal prices the recommendation splits, and Good Culture becomes the clear pick once Mulu costs about 25% more. When a consumer mentions a tight budget, 6% of conversations still recommend it, and store brands take 78% of value questions. In the store-specific test, Walmart's Great Value was the top pick in 5 of 9 Walmart questions, a small sample. Loyal buyers who ask for more protein are often advised to add Mulu. Availability is a minor point: 6% of Good Culture mentions describe it as hard to find, mostly on Gemini and Claude, compared with almost none for Daisy. Mulu is described as hard to find more often (14%), which suggests its reach is still limited.",
+      "quote": {
+        "text": "Store brands (Great Value, Kirkland, Aldi's Friendly Farms)… on a tight budget I'd switch to a store brand or a large tub.",
+        "who": "Claude, after recommending Good Culture, asked \"What if I'm on a tight budget?\""
+      },
+      "prospective": "AI answers do not follow sales size. Good Culture ranks fourth in dollar sales (11%) but first in AI answers, and Mulu leads protein on two engines without appearing in the sales figures. The same dynamic that lifted Good Culture could lift a larger rival just as quickly, so its AI lead is best underwritten as contestable, not locked in.",
+      "existing": "The engines accept today's premium over Daisy, but at equal prices they split between Good Culture and Mulu, so there is little room to raise prices where protein matters. A larger tub or multipack, sold more widely in mass retail, would give the engines a Good Culture option when budget comes up, and wider distribution would also address the \"hard to find\" mentions.",
+      "existing_h": "Add a Value Option",
+      "prospective_h": "A Larger Rival Could Win AI Answers Before Sales",
+      "sources": [
+        [
+          "Dollar-sales share: Circana via Dairy Foods (52 weeks to Feb 2026)",
+          "https://www.dairyfoods.com/articles/99101-cottage-cheese-sales-top-2-billion"
+        ]
+      ]
+    },
+    {
+      "id": "why",
+      "dim": "sources",
+      "title": "Third-Party Sources Shape the Answers",
+      "body": "The engines rely more on roundups and reviews than on the brand's own site. ChatGPT cites goodculture.com in 37% of brand answers, Gemini in 29% and Claude in 10%. Accuracy follows the same pattern: ChatGPT states the label's calories and sodium correctly in most answers, while Claude, which draws on AOL and Yahoo roundups, mostly states 80 kcal and 340 mg instead of 90 and 380. One review stands out: 67 of the 150 answers that pick Good Culture cite The Kitchn's ranking.",
+      "prospective": "Nearly half of the answers that pick Good Culture cite a single outside review, The Kitchn's ranking. A new ranking that favored a rival could shift all three engines at once. A wider spread of sources, both independent and the brand's own, would make the lead less dependent on any one of them.",
+      "existing": "Detailed, current product pages on goodculture.com, with nutrition facts and ingredients for each fat level, give the engines accurate facts to quote, as ChatGPT already does. More independent reviews beyond The Kitchn would spread the recommendation across several sources, so no single ranking carries it. The next quarterly rerun would show whether both help.",
+      "existing_h": "Widen the Evidence Base",
+      "prospective_h": "One Review Carries Much of the Lead"
+    }
+  ],
+  "tools": {
+    "intro": "Each tool had one job. The author ran the study in about 9 hours and reviewed every change.",
+    "rows": [
+      [
+        "Claude (Cowork)",
+        "Coding and drafting partner",
+        "Files, code, shell and web search in one session"
+      ],
+      [
+        "OpenAI, Gemini, Anthropic APIs",
+        "The three engines tested, with web search on",
+        "Closest repeatable proxy for the free consumer apps"
+      ],
+      [
+        "Qwen3.8 27B (OpenRouter)",
+        "Primary judge for every answer",
+        "Open-weight, independent of all three engines, low cost"
+      ],
+      [
+        "Claude Haiku 5.5",
+        "Second judge on all answers (κ 0.84)",
+        "Cheap cross-check, not primary since it shares Claude's maker"
+      ],
+      [
+        "Hand labels (49 answers)",
+        "Ground truth for judge accuracy (about 82%)",
+        "Checks both judges where they disagree"
+      ],
+      [
+        "Python (pandas, PyYAML, httpx, openpyxl)",
+        "Collector, metrics, tables, labelling sheet",
+        "Plain HTTPS, no vendor SDKs, easy to swap engines"
+      ],
+      [
+        "Static HTML page",
+        "Charts computed in the browser",
+        "One file, no server"
+      ],
+      [
+        "Playwright",
+        "Automated page-rendering checks",
+        "Catches layout and data bugs"
+      ],
+      [
+        "Web search",
+        "Outside sources for sales, growth and label facts",
+        "Every external number is cited"
+      ]
+    ],
+    "cost": "API costs (about $50) were covered by Harvard University's education plan for students.",
+    "time": [
+      [
+        "Framing and design",
+        "Reading the brief, choosing engines, rivals and measures, writing the question grid",
+        "1.5"
+      ],
+      [
+        "Data collection and judging",
+        "Running the 1,596 questions and the two judges, in parallel",
+        "2"
+      ],
+      [
+        "Human validation",
+        "Hand-labelling 49 answers and checking agreement between judges",
+        "1"
+      ],
+      [
+        "Analysis and Dashboard",
+        "Metrics, the nine Dashboard panels and chart iterations",
+        "2.5"
+      ],
+      [
+        "Findings and write-up",
+        "The four findings, investor views, Method and Tools text, and checking every number",
+        "2"
+      ]
+    ]
+  },
+  "future": [
+    [
+      "Real demand and supply data",
+      "Panel, repeat-purchase or distribution data (for example Circana or NielsenIQ) would test whether recommendations turn into buyers."
+    ],
+    [
+      "Quarterly reruns with larger samples",
+      "Regular reruns would turn the snapshot into a trend, and about 30 answers per cell would make per-engine results firm. Cost scales roughly linearly from about $50 for this run."
+    ],
+    [
+      "Rival-centred tests",
+      "Seeding Mulu and store brands in the pushback test, with finer price steps, would rank rival resilience and locate the switch points."
+    ],
+    [
+      "Real consumer wording",
+      "Questions drawn from search queries and forums such as Reddit would reduce phrasing bias."
+    ]
+  ],
+  "stretch": {
+    "intro": "The pipeline, judges, metrics and this page are reusable. For Birkenstock, the following would change:",
+    "items": [
+      [
+        "Config",
+        "Brands and aliases (for example Teva, Crocs, Dr. Scholl's and store-brand look-alikes), owned websites, and a sales baseline from a footwear market-share source."
+      ],
+      [
+        "Questions",
+        "Needs such as comfort, arch support, durability, style, price and vegan materials, and stores such as Amazon, Zappos, Nordstrom and DSW. Stages and phrasings carry over."
+      ],
+      [
+        "Judge attributes",
+        "Replace the dairy list (\"high protein\", \"live cultures\", \"salty\") with footwear terms (\"comfortable\", \"supportive\", \"durable\", \"pricey\", \"runs small\"). This means moving the list from the code into the config."
+      ],
+      [
+        "Fact check",
+        "Replace label nutrition with product facts, such as price and footbed material."
+      ],
+      [
+        "Price test",
+        "Real prices of the Arizona sandal against its closest rivals."
+      ],
+      [
+        "Findings text",
+        "A new findings file. Everything else is generated by the same commands."
+      ]
+    ],
+    "outro": "About a day of setup, then the same collect, score and site commands. API cost is about $50 at the same scale."
+  },
+  "sources_all": [
+    [
+      "Market and sales data",
+      [
+        [
+          "Cottage cheese dollar sales by brand, Circana, 52 weeks ending Feb 22 2026 (Dairy Foods)",
+          "https://www.dairyfoods.com/articles/99101-cottage-cheese-sales-top-2-billion"
+        ],
+        [
+          "Good Culture growth vs. category, SPINS data through May 2024 (Nosh)",
+          "https://www.nosh.com/news/2024/active-culture-appeal-how-cottage-cheese-is-keeping-its-cool"
+        ]
+      ]
+    ],
+    [
+      "Brand positioning",
+      [
+        [
+          "Good Culture repositions cottage cheese as an on-the-go protein source (FoodNavigator, 2016)",
+          "https://www.foodnavigator.com/Article/2016/10/04/Good-Culture-repositions-cottage-cheese-as-on-the-go-protein-source/"
+        ],
+        [
+          "Brands reinvent cottage cheese as high-protein superfood (SupplySide, July 2025)",
+          "https://www.supplysidefbj.com/food-ingredients/brands-reinvent-cottage-cheese-as-high-protein-superfood-for-new-generation"
+        ]
+      ]
+    ],
+    [
+      "AI engines and usage",
+      [
+        [
+          "The Decoder, citing The Information, January 2026",
+          "https://the-decoder.com/only-5-percent-of-chatgpts-900-million-weekly-users-pay-and-reportedly-most-arent-worth-much-to-advertisers/"
+        ],
+        [
+          "ChatGPT's market share slips below 50% for first time (TechCrunch, 16 Jun 2026, citing Sensor Tower)",
+          "https://techcrunch.com/2026/06/16/chatgpts-market-share-slips-below-50-for-first-time/"
+        ],
+        [
+          "OpenAI Free/Go/Plus models after GPT-6 (Developers Digest)",
+          "https://www.developersdigest.tech/blog/chatgpt-free-vs-go-vs-plus-gpt-6-2026"
+        ],
+        [
+          "Gemini app limits free users to Flash-Lite (9to5Google, 3 Oct 2026)",
+          "https://9to5google.com/2026/10/03/gemini-model-limits-oct-26/"
+        ],
+        [
+          "Claude Sonnet 5.5 is available on the free plan (Notebookcheck, 30 Sep 2026)",
+          "https://www.notebookcheck.net/Claude-Sonnet-5-5-is-available-on-the-free-plan-unlike-Opus-5-5.1411941.0.html"
+        ]
+      ]
+    ],
+    [
+      "Models used",
+      [
+        [
+          "Engine: GPT-6 Luna, gpt-6-luna (OpenAI API docs)",
+          "https://developers.openai.com/api/docs/models/gpt-6-luna"
+        ],
+        [
+          "Engine: Gemini 3.5 Flash-Lite, gemini-3.5-flash-lite (Google Gemini API docs)",
+          "https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite"
+        ],
+        [
+          "Engine: Claude Sonnet 5.5, claude-sonnet-5-5 (Claude Platform docs)",
+          "https://platform.claude.com/docs/en/models/sonnet-5-5/overview"
+        ],
+        [
+          "Primary judge: Qwen3.8 27B, qwen/qwen3.8-27b (OpenRouter)",
+          "https://openrouter.ai/qwen/qwen3.8-27B"
+        ],
+        [
+          "Second judge: Claude Haiku 5.5, claude-haiku-5-5 (Claude Platform docs)",
+          "https://platform.claude.com/docs/en/models/haiku-5-5/overview"
+        ]
+      ]
+    ],
+    [
+      "Product labels and prices",
+      [
+        [
+          "Good Culture Simply Classic 2% label (goodculture.com)",
+          "https://goodculture.com/product/simply-cottage-cheese-16-oz-lowfat-classic"
+        ],
+        [
+          "Good Culture Simply Classic 2% price, captured 16 Oct 2026 (Walmart)",
+          "https://walmart.com/ip/seort/774787648"
+        ],
+        [
+          "Daisy Pure & Natural 4% label and price, captured 16 Oct 2026 (Walmart)",
+          "https://walmart.com/ip/15716746"
+        ],
+        [
+          "Mulu 2% suggested retail price and label (DFA press release, Apr 2026)",
+          "https://www.dfamilk.com"
+        ],
+        [
+          "Kirkland Signature 2% cottage cheese label (Open Food Facts)",
+          "https://world.openfoodfacts.org/product/0096619177646"
+        ]
+      ]
+    ]
+  ],
+  "sources_note": "Engine answers and every link they cite are in the Prompt-Response Log. Breakstone's label and price come from a ShopRite product page captured on 16 Oct 2026.",
+  "limits": [
+    [
+      "Recommendation is not purchase",
+      "No real demand or supply data was merged, due to time limits. The simulated questions already support clear, pattern-level conclusions, but they cannot show that recommendations drive sales."
+    ],
+    [
+      "One snapshot, limited prompts per category",
+      "Answers change with model updates and new web content, and each need × engine cell has 12 answers. Per-engine results are directional and flagged where used."
+    ],
+    [
+      "Tests built around Good Culture",
+      "Due to time and resource limits, only three brands were seeded in the pushback test, and head-to-head and price tests all involve Good Culture. Rivals cannot be ranked against each other on resilience, and Mulu's own staying power is untested."
+    ],
+    [
+      "Author-written questions",
+      "All phrasings were written for this study, in US English. Real consumer wording may shift the results."
+    ]
+  ]
+}
