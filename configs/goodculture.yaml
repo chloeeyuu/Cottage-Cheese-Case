@@ -3,14 +3,14 @@ run_name: goodculture
 focal_brand: Good Culture
 category: cottage cheese
 
-sales_baseline: data/reference/circana_cottage_cheese.csv   # brand, dollar_sales_musd, units_m, period, source
+sales_baseline: data/reference/circana_sales_by_brand.csv   # brand, dollar_sales_musd, units_m, period, source
 product_labels: data/reference/product_labels.csv
 
 prompts:
-  m1: prompts/m1_need_journey.yaml
-  m3: prompts/m3_pushback_resilience.yaml
-  probes: prompts/targeted_probes.yaml
-  extra: prompts/extra_questions.yaml
+  m1: prompts/core_need_grid.yaml
+  m3: prompts/pushback_tests.yaml
+  probes: prompts/supplementary_tests.yaml
+  extra: prompts/store_and_need_questions.yaml
 
 # Brand dictionary: aliases (lowercase) are matched in answers; owned_domains feed owned-source dependency.
 brands:
@@ -38,7 +38,7 @@ brands:
     owned_domains: []
     oi_group: Private label
 
-# Head-to-head rivals and seeded brands live in the prompt files (targeted_probes.yaml, m3_pushback_resilience.yaml).
+# Head-to-head rivals and seeded brands live in the prompt files (supplementary_tests.yaml, pushback_tests.yaml).
 
 engines:
   openai:    {model: gpt-6-luna, web_search: true}   # ChatGPT Free default since Oct 8, 2026

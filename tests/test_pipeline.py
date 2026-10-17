@@ -14,7 +14,7 @@ BANNED = ["good culture", "daisy", "breakstone", "knudsen", "kirkland", "lactaid
 
 
 def test_m1_has_81_brand_free_prompts():
-    spec = build.load_yaml(ROOT / "prompts" / "m1_need_journey.yaml")["prompts"]
+    spec = build.load_yaml(ROOT / "prompts" / "core_need_grid.yaml")["prompts"]
     prompts = [p for need in spec.values() for stage in need.values() for p in stage]
     assert len(spec) == 9 and len(prompts) == 81
     assert not [p for p in prompts if any(b in p.lower() for b in BANNED)]
@@ -106,7 +106,7 @@ def test_wilson_and_arr():
 
 def test_extra_prompts_are_brand_free_and_counted():
     rows = [r for r in build.build_plan(CFG, ["extra"]) if r["engine"] == "anthropic"]
-    spec = build.load_yaml(ROOT / "prompts" / "extra_questions.yaml")
+    spec = build.load_yaml(ROOT / "prompts" / "store_and_need_questions.yaml")
     assert len(rows) == len(spec["prompts"]) * spec["repeats"]
     brand_words = [b for b in BANNED if b not in ("walmart", "costco", "kroger")]
     assert not [r for r in rows if any(b in r["messages"][0]["content"].lower() for b in brand_words)]

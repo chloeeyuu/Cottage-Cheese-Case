@@ -79,7 +79,7 @@ def _top_rival(cfg: dict, brand: str) -> str:
 
 
 def build_probes(cfg: dict, root: Path) -> list[dict]:
-    """Targeted probes (loyalty, head-to-head, M2 two-step, M5 price, regions); see prompts/targeted_probes.yaml."""
+    """Targeted probes (loyalty, head-to-head, M2 two-step, M5 price, regions); see prompts/supplementary_tests.yaml."""
     spec = load_yaml(root / cfg["prompts"]["probes"])
     cat = cfg["category"]
     items = []  # (section, prompt or messages, followups, meta)
