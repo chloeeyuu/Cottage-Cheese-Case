@@ -263,11 +263,12 @@ button.btn { font: 500 14px var(--sans); background: var(--surface); color: var(
 .lede.wide { max-width: none; }
 .prose h2 { margin-top: 36px; }
 .prose p, .prose li { color: var(--ink-2); }
-.flow { list-style: none; counter-reset: step; display: grid; grid-template-columns: repeat(auto-fit, minmax(124px, 1fr)); gap: 8px; padding: 0; margin: 14px 0 20px; }
+.flow { list-style: none; counter-reset: step; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 0; margin: 14px 0 20px; }
+@media (max-width: 700px) { .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .flow li { counter-increment: step; background: var(--surface); border-top: 3px solid var(--navy); padding: 12px 12px 14px; display: grid; gap: 4px; align-content: start; position: relative; }
 .flow li::before { content: counter(step); font: 400 22px/1 var(--display); color: var(--sky); }
 .flow .fs { font: 400 15px/1.25 var(--display); color: var(--navy); }
-.flow .fd { font-size: 12px; line-height: 1.45; color: var(--ink-2); }
+.flow .fd { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
 .sub-h { font: 600 16px/1.3 var(--sans); margin: 24px 0 6px; color: var(--accent) !important; }
 dl.defs { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px 14px; margin: 8px 0 14px; }
 dl.defs dt { font: 500 11px/1.9 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
@@ -874,13 +875,14 @@ function renderMethod() {
   const src = F.engines_intro_source ? ` (<a href="${esc(F.engines_intro_source[1])}" target="_blank" rel="noopener">${esc(F.engines_intro_source[0])}</a>)` : "";
   $("#tab-method").innerHTML = `<div class="prose">
     <h2 style="margin-top:0">Study Design</h2>
-    <ol class="flow">${(F.flow || []).map(([t, d], i) => `<li${i < 5 ? ` class="flink" data-step="${i + 1}" title="Go to Step ${i + 1}"` : ""}><span class="fs">${esc(t)}</span><span class="fd">${esc(d)}</span></li>`).join("")}</ol>
+    <ol class="flow">${(F.flow || []).map(([t, d], i) => `<li${i < 8 ? ` class="flink" data-step="${i + 1}" title="Go to Step ${i + 1}"` : ""}><span class="fs">${esc(t)}</span><span class="fd">${esc(d)}</span></li>`).join("")}</ol>
 
     <h2 id="step-1">Step 1: Set Up the Study</h2>
     <p>The study compares ${esc(FOCAL)} with six rivals, on three AI engines, across nine consumer needs, against a sales baseline.</p>
     <h3 class="sub-h">Rival Brands</h3>
     <table class="deftab"><tbody>${(F.rival_why || []).map(([r, w]) => `<tr><th>${esc(r)}</th><td>${esc(w)}</td></tr>`).join("")}</tbody></table>
     ${(F.engines || []).length ? `<h3 class="sub-h">Engines</h3>
+    <p>${esc(F.engines_intro || "")}${src}</p>
     <div class="engines">${F.engines.map(e => `<div class="engine">
       <div class="eng-head"><h3>${esc(e.app)}</h3><code>${esc(e.model)}</code></div>
       <dl><dt>Free tier</dt><dd>${esc(e.tier)}</dd><dt>Reach</dt><dd>${esc(e.share)}</dd></dl>
@@ -916,8 +918,7 @@ function renderMethod() {
     <p class="small">An early scan of nine one-line need questions (${counts["Need scan"] || 0} per engine) was superseded by the main grid and is kept in the data for the record.</p>
 
     <h2 id="step-3">Step 3: Query the Engines</h2>
-    <p>${esc(F.engines_intro || "")}${src}</p>
-    <p>Every question was sent through each engine's API with web search on, and core-grid questions were asked twice per engine. Answers and the links they cite are cached, so a rerun only collects what is new.</p>
+    <p>Every question was sent through each engine's API with web search on and no adjusted system prompt, and core-grid questions were asked twice per engine. Answers and the links they cite are cached, so a rerun only collects what is new.</p>
 
     <h2 id="step-4">Step 4: Score the Answers</h2>
     <p>One judge scores every conversation: <b>${esc(D.meta.judges[D.meta.primary_judge])}</b>, an open-weight model from a different company than the three engines tested. Its coding was checked in two ways:</p>
@@ -936,14 +937,20 @@ function renderMethod() {
       <tr id="metric-sources"><th>Source control</th><td>Share of answers citing the brand's own site, and whether the nutrition facts stated match the label.</td></tr>
     </tbody></table>
 
-    <div class="grouphead">Beyond This Study</div>
-    <h2 class="beyond">Limitations</h2>
+    <h2>Step 6: Analyze</h2>
+    <p>Each metric is compared across brands, engines, consumer needs and stores. Top-pick shares are set against dollar-sales shares to see which brands the engines recommend more or less often than consumers buy them. Every result is also split by engine, so a pattern counts only when it is not driven by one model, and cells with few answers are flagged as directional. The findings then read each result from two angles, an existing investor and a prospective one.</p>
+
+    <h2>Step 7: Publish</h2>
+    <p>This page is built from the collected answers and judge codings by a single command, with the code and data on <a href="https://github.com/chloeeyuu/Cottage-Cheese-Case" target="_blank" rel="noopener">GitHub</a>. Every chart is computed in the browser from the same data, and the Prompt-Response Log shows each answer behind the numbers.</p>
+
+    <h2>Step 8: Limitations and Next Steps</h2>
+    <h3 class="sub-h">Limitations</h3>
     <table class="deftab"><tbody>${(F.limits || []).map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table>
     <p class="note">Outside-in only: public sources, no contact with the company, retailers or competitors. API costs (about $50) were covered by Harvard University's education plan for students.</p>
 
-    ${F.future ? `<h2 class="beyond">Future Work</h2><table class="deftab"><tbody>${F.future.map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table>` : ""}
-    ${F.track ? `<h2 class="beyond">Ongoing Monitoring</h2><p>${esc(F.track.intro)}</p><ul>${F.track.items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-    <h2 class="beyond">Extending to Other Brands</h2>
+    ${F.future ? `<h3 class="sub-h">Future Work</h3><table class="deftab"><tbody>${F.future.map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table>` : ""}
+    ${F.track ? `<h3 class="sub-h">Ongoing Monitoring</h3><p>${esc(F.track.intro)}</p><ul>${F.track.items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    <h3 class="sub-h">Extending to Other Brands</h3>
     ${F.stretch ? `<p>${esc(F.stretch.intro)}</p><table class="deftab"><tbody>${F.stretch.items.map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table><p>${esc(F.stretch.outro)}</p>` : ""}
 <pre>python -m aibench.cli collect --config configs/birkenstock.yaml
 python -m aibench.cli score   --config configs/birkenstock.yaml --judge qwen
@@ -953,7 +960,7 @@ python -m aibench.cli site    --config configs/birkenstock.yaml</pre>
     hs.forEach((x, k) => x.id = "msec-" + k);
     const wrap = document.createElement("div"); wrap.className = "dash";
     const item = (x, k) => `<a href="#method" data-msec="${k}">${esc(x.textContent.replace(/^Step (\d): /, "$1  "))}</a>`;
-    wrap.innerHTML = `<nav class="sidenav" aria-label="Method sections"><div><div class="grp">Method</div>${hs.map((x, k) => x.classList.contains("beyond") ? "" : item(x, k)).join("")}</div><div><div class="grp">Beyond This Study</div>${hs.map((x, k) => x.classList.contains("beyond") ? item(x, k) : "").join("")}</div></nav>`;
+    wrap.innerHTML = `<nav class="sidenav" aria-label="Method sections"><div><div class="grp">Method</div>${hs.map((x, k) => item(x, k)).join("")}</div></nav>`;
     root.appendChild(wrap); wrap.appendChild(inner);
     wrap.querySelectorAll("li.flink").forEach(li => li.addEventListener("click", () => hs.find(x => x.textContent.startsWith("Step " + li.dataset.step + ":")).scrollIntoView({behavior: "smooth", block: "start"})));
     wrap.querySelectorAll("[data-msec]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); document.getElementById("msec-" + a.dataset.msec).scrollIntoView({behavior: "smooth", block: "start"}); })); }

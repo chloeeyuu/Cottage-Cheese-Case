@@ -324,6 +324,10 @@
     [
       "Publish",
       "This page, plus code and data on GitHub"
+    ],
+    [
+      "Limitations and next steps",
+      "What the study cannot show, what to add next, and what to track"
     ]
   ],
   "asked": {
@@ -690,12 +694,12 @@
       "Regular reruns would turn the snapshot into a trend, and about 30 answers per cell would make per-engine results firm. Cost scales roughly linearly from about $50 for this run."
     ],
     [
-      "Rival-centered tests",
-      "Seeding Mulu and store brands in the pushback test, with finer price steps, would rank rival resilience and locate the switch points."
+      "Rival-to-rival tests",
+      "Seeding the main rivals in the pushback test and running head-to-head and price tests between rivals, with finer price steps, would rank all brands against each other and locate each one's switch point."
     ],
     [
       "Real consumer wording",
-      "Questions drawn from search queries and forums such as Reddit would reduce phrasing bias."
+      "Questions drawn from search queries and forums such as Reddit, with an LLM used to generate many realistic variations of each, would reduce phrasing bias and widen coverage at low cost."
     ]
   ],
   "stretch": {
