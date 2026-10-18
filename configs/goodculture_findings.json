@@ -79,7 +79,7 @@
       "question": "\"I usually buy it. Should I switch?\"",
       "value": "100% stay, 0% on budget",
       "status": "warning",
-      "note": "With no pressure, every engine tells buyers of all three brands to stay. On a tight budget, Good Culture and Daisy buyers are steered almost entirely to store brands, while store-brand buyers mostly stay. For more protein, the AI usually suggests trying Mulu alongside Good Culture rather than switching. At Walmart, it mostly hedges between keeping Good Culture and trying the store brand, Great Value.",
+      "note": "With no pressure, every engine tells buyers of all three brands to stay. On a tight budget, Good Culture and Daisy buyers are steered almost entirely to store brands, while store-brand buyers mostly stay. For more protein, the AI usually suggests adding Mulu while keeping Good Culture. At Walmart, it mostly hedges between keeping Good Culture and trying the store brand, Great Value.",
       "measures": "Whether the AI tells an existing buyer to stay with their brand.",
       "how": "\"I usually buy [brand]. Should I stick with it?\", with and without a pressure such as a tight budget, wanting more protein, or shopping at Walmart.",
       "metric": "loyalty"
@@ -299,7 +299,7 @@
   "flow": [
     [
       "Set up the study",
-      "Rival brands, product attributes, consumer needs"
+      "Rival brands, engines, product attributes, consumer needs"
     ],
     [
       "Build the prompts",
@@ -484,88 +484,122 @@
   "bottom": {
     "verdict": "AI engines already treat Good Culture as the category default, well ahead of its sales. The open question is whether it can hold that position where larger dairy brands compete: protein, price and reach.",
     "existing_h": "Turn AI Recommendations Into Sales",
-    "existing": "The engines recommend Good Culture more than four times as often as its sales share would predict. The cheapest way to widen that lead is a broader evidence base: detailed product pages and more independent reviews, so every engine quotes the label correctly and no single ranking carries the recommendation. A value format, such as a larger tub, with wider mass-retail distribution would reach budget-minded consumers. The hardest move is choosing a clear position, either one claim the engines tie to Good Culture alone, such as cooking, or the best all-round choice that also closes the protein gap. A quarterly rerun of this benchmark would show whether each move changes what the engines recommend.",
-    "prospective_h": "Strong Demand Signal, Contestable Lead",
-    "prospective": "The AI preference matches Good Culture's reported growth, about six times the category rate in 2024, which supports the demand case. The lead rests on taste, texture and cooking and holds against Daisy, the category leader, but it can be challenged: AI picks do not track sales size, as Mulu's lead on protein shows, and nearly half of Good Culture's top picks rest on one review. Diligence should test whether recommendations turn into repeat purchases, how far pricing power goes (a premium holds over Daisy but not over Mulu at equal prices), and how management would compete with a larger rival on protein, budget and mass retail."
+    "existing": "The engines recommend Good Culture more than four times as often as its sales share would predict. The cheapest step is better product data: detailed product pages and a wider set of reviews, so every engine quotes the right figures. A value option for everyday grocery stores would reach budget-minded consumers, and one specific selling point the engines tie to Good Culture, such as cooking, would sharpen its lead. Rerunning this benchmark each quarter, including in retailer assistants such as Sparky and Rufus, would show whether each move works.",
+    "prospective_h": "Strong Demand Signal, Premium Position",
+    "prospective": "The AI preference matches Good Culture's reported growth, which supports the demand case. The engines see it as a premium brand that wins on taste and cooking while trailing on nutrition and price, and part of its lead rests on one outside review. Diligence should test whether recommendations turn into repeat purchases, whether the growth plan targets a premium niche or the mass market, and who at the company owns AI-search visibility."
   },
   "findings": [
     {
       "id": "wins",
       "dim": "default",
       "title": "Most Recommended Brand, Well Above Its Sales Share",
-      "body": "Good Culture is the top pick on all three engines, at more than four times its share of dollar sales. Daisy, the category leader, is named in a similar share of answers (64% vs. 81%) but recommended in 8%. The engines cite Good Culture's taste and texture, most often pointing to The Kitchn's test of 22 brands, which named Good Culture's whole-milk cottage cheese the best. At product level, they name the 2% and 4% tubs about equally. Snack cups and flavored lines are rarely mentioned.",
       "quote": {
         "text": "My default pick: Good Culture 2%. It's thick and creamy, and the label lists 14 g of protein per 1/2 cup.",
         "who": "ChatGPT, asked \"What cottage cheese should I buy?\""
       },
-      "prospective": "The AI lead lines up with reported growth: SPINS data had Good Culture growing about six times faster than the category in 2024. Repeat-purchase data would confirm whether being recommended turns into retained buyers.",
-      "existing": "The engines' case for Good Culture rests on independent reviews, led by The Kitchn's test, so new reviews and taste tests keep that evidence current. If snack cups and flavored lines matter to growth, they need their own reviews and product pages, since the engines rarely mention them.",
       "sources": [
         [
           "Dollar-sales share: Circana via Dairy Foods (52 weeks to Feb 2026)",
           "https://www.dairyfoods.com/articles/99101-cottage-cheese-sales-top-2-billion"
         ],
         [
-          "SPINS growth figures via Nosh (2024)",
+          "SPINS growth via Nosh (2024)",
           "https://www.nosh.com/news/2024/active-culture-appeal-how-cottage-cheese-is-keeping-its-cool"
+        ],
+        [
+          "Sparky and Rufus results, eMarketer (Mar 2026)",
+          "https://www.emarketer.com/content/walmart-amazon-say-ai-boosts-ecommerce-sales"
+        ],
+        [
+          "What retailer assistants favor, eMarketer (Jun 2026)",
+          "https://www.emarketer.com/content/faq-on-ai-shopping-assistants--what-s-driving-adoption-how-brands-win-visibility"
         ]
       ],
-      "existing_h": "Keep the Evidence Fresh",
-      "prospective_h": "Check That Recommendations Convert",
-      "prospective_src": [
-        "SPINS data via Nosh, 2024",
-        "https://www.nosh.com/news/2024/active-culture-appeal-how-cottage-cheese-is-keeping-its-cool"
-      ]
+      "issue": "whether the AI lead turns into sales",
+      "evidence": [
+        "Good Culture is the top pick in 46% of the 324 brand and purchase answers, more than four times its 11% share of dollar sales, and the only brand picked first more often than its sales share would predict. The result holds on all three engines.",
+        "Daisy, the category leader, and store brands are mentioned often (64% and 51% of answers) but rarely picked first (8% and 9%).",
+        "SPINS data had Good Culture growing about six times faster than the category in 2024."
+      ],
+      "ex": {
+        "strength": "The engines recommend Good Culture by default, as the chart on the right shows.",
+        "pain": "The recommendation share (46%) is far above the sales share (11%). Good Culture is chosen in AI answers much more often than it is bought.",
+        "todo": "Bring the same lead into retailer shopping assistants, where the answer sits next to a buy button: Walmart's Sparky and Amazon's Rufus. Those assistants favor products with high ratings, many reviews and detailed listings, so Good Culture's retailer pages need complete nutrition, ingredients and use cases, refreshed each quarter. Adding these assistants to the quarterly benchmark would show whether Good Culture ranks there too."
+      },
+      "pr": {
+        "risk": "No data yet links AI recommendations to repeat buying, so recommendation share should not be read as purchase share.",
+        "verify": "Repeat-purchase and panel data showing the same lead over rivals in actual purchases."
+      }
     },
     {
       "id": "pillars",
       "dim": "needs",
-      "title": "Leads on Taste and Everyday Use, Contested on Protein and Clean Label",
-      "body": "Good Culture is the top pick for taste and texture, cooking and everyday use on all three engines, at about three-quarters of answers, and also leads low-calorie and lactose-free questions. Two of its marketed benefits are contested. On protein, Mulu, made by the dairy cooperative DFA with 18 g per 1/2 cup, leads on Gemini and Claude, while ChatGPT still favors Good Culture (7 of 12 answers). Good Culture markets protein as a benefit, and its CEO calls cottage cheese \"a protein powerhouse\", but its tubs carry the category-standard 14 g and it has not claimed the most protein. On clean ingredients, Daisy leads on ChatGPT (8 of 12), while Gemini and Claude favor Good Culture. Nancy's leads half of ChatGPT's live-culture questions (small sample). Value and low-sodium questions go to store brands and Friendship on every engine.",
-      "prospective": "Good Culture's lead is broad, covering six of nine needs, but its most common description, clean ingredients, is shared with Daisy, and protein, the most promoted benefit in the category, already goes to Mulu on Gemini and Claude. A broad lead without a distinct claim may be easier for a well-funded rival to erode one need at a time. A useful question for management is which position the growth plan relies on, a single owned claim or the all-round choice.",
-      "existing": "Good Culture leads six of nine consumer needs, so the engines already treat it as the well-rounded choice, but they describe it in the same terms as Daisy, led by clean ingredients. Two paths could probably work. One is to own a single clear claim, as Mulu does with protein, for example cooking, where Good Culture already leads on every engine. The other is to position Good Culture as the best all-round choice, keeping its lead on taste and everyday use while closing the gaps on protein and, on ChatGPT, clean label.",
-      "sources": [
-        [
-          "CEO on protein, SupplySide (2025)",
-          "https://www.supplysidefbj.com/food-ingredients/brands-reinvent-cottage-cheese-as-high-protein-superfood-for-new-generation"
-        ],
-        [
-          "Launch positioning, FoodNavigator (2016)",
-          "https://www.foodnavigator.com/Article/2016/10/04/Good-Culture-repositions-cottage-cheese-as-on-the-go-protein-source/"
-        ]
+      "title": "Wins on Taste and Cooking, Loses on Nutrition and Price",
+      "issue": "where Good Culture wins, where it loses, and to whom",
+      "evidence": [
+        "Good Culture is the top pick for cooking, everyday use, and taste and texture on all three engines, at about three-quarters of answers.",
+        "On clean ingredients it is close to a tie: the engines describe Good Culture and Daisy in the same terms, and Good Culture leads that question only narrowly, with Daisy ahead on ChatGPT.",
+        "It loses the other nutrition- and price-driven needs: protein to Mulu, mainly on Gemini and Claude, low sodium to Friendship and value to store brands."
       ],
-      "existing_h": "Specialist or All-Rounder",
-      "prospective_h": "Broad Lead, Thin Differentiation"
+      "ex": {
+        "strength": "The broadest lead in the category, as the chart on the right shows.",
+        "pain": "The wins are on taste and specific uses such as cooking. On nutrition facts and price, where consumers compare brands side by side, Good Culture has no clear edge.",
+        "todo": "Make the nutrition case visible: protein per calorie, sodium and named probiotic strains on packs, product pages and retailer listings. To build on the lead, Good Culture needs a specific selling point the engines tie to it, such as cooking, backed by recipes and \"best for cooking\" claims. If it aims to be the all-round choice instead, a higher-protein product would close the protein gap."
+      },
+      "pr": {
+        "risk": "The lead is broad but shallow, so a well-funded rival could take it one need at a time.",
+        "verify": "Which consumer the growth plan targets. A cooking-focused consumer plays to the current lead, while an everyday consumer who compares nutrition facts would need a stronger protein, sodium or price story."
+      }
     },
     {
       "id": "holds",
       "dim": "pushback",
-      "title": "Holds Against Named Rivals, Weaker on Price, Protein and Mass Retail",
-      "body": "The follow-up tests reflect what a larger brand might do: present itself as the alternative, compete on price, lead on protein and expand in mass retail. Against named rivals, Good Culture's position is stable. It loses one of 108 head-to-heads, and most recommendations survive a challenge from Daisy. On price, there is no cushion against Mulu: at equal prices the recommendation splits, and Good Culture becomes the clear pick once Mulu costs about 25% more. When a consumer mentions a tight budget, 6% of conversations still recommend it, and store brands take 78% of value questions. In the store-specific test, Walmart's Great Value was the top pick in 5 of 9 Walmart questions, a small sample. Loyal buyers who ask for more protein are often advised to add Mulu. Availability is a minor point: 6% of Good Culture mentions describe it as hard to find, mostly on Gemini and Claude, compared with almost none for Daisy. Mulu is described as hard to find more often (14%), which suggests its reach is still limited.",
+      "title": "Holds Against Rivals by Name, Weaker on Price and Reach",
       "quote": {
         "text": "Store brands (Great Value, Kirkland, Aldi's Friendly Farms)... on a tight budget I'd switch to a store brand or a large tub.",
         "who": "Claude, after recommending Good Culture, asked \"What if I'm on a tight budget?\""
       },
-      "prospective": "AI answers do not follow sales size: Good Culture ranks fourth in dollar sales (11%) but first in AI answers, and Mulu leads protein on two engines without appearing in the sales figures. The same dynamic that lifted Good Culture could lift a larger rival just as quickly, so the AI lead should be underwritten as open to challenge.",
-      "existing": "The engines accept today's premium over Daisy, but at equal prices they split between Good Culture and Mulu, so there is little room to raise prices where protein matters. A larger tub or multipack, sold more widely in mass retail, would give the engines a Good Culture option when budget comes up, and wider distribution would also address the \"hard to find\" mentions.",
-      "existing_h": "Add a Value Option",
-      "prospective_h": "A Larger Rival Could Win AI Answers Before Sales",
       "sources": [
         [
           "Dollar-sales share: Circana via Dairy Foods (52 weeks to Feb 2026)",
           "https://www.dairyfoods.com/articles/99101-cottage-cheese-sales-top-2-billion"
         ]
-      ]
+      ],
+      "issue": "whether Good Culture could hold its position if a larger brand competed on price and distribution",
+      "evidence": [
+        "When a rival is named, the recommendation holds: Good Culture loses one of 108 head-to-heads, and most answers still recommend it when challenged with Daisy.",
+        "Price is the weak spot: the engines accept a 6.5% premium over Daisy but not 30%, split evenly with Mulu at equal prices, and switch to store brands on a tight budget. Some answers call Good Culture hard to find.",
+        "Strongest at premium grocers, weaker at everyday ones: it leads at Whole Foods, wins about half of Kroger and Costco answers, and loses Walmart to Great Value (9 answers per store, directional)."
+      ],
+      "ex": {
+        "strength": "Stable when challenged by name, as the chart on the right shows.",
+        "pain": "No value option and a weaker presence in mass and conventional grocery, so budget-minded consumers are sent elsewhere. Those stores, such as Walmart and Kroger, reach a much broader set of consumers than premium grocers.",
+        "todo": "Keep prices steady, and look beyond premium grocers such as Whole Foods. A value option for everyday grocery stores, such as a larger tub or multipack, would give the engines a Good Culture pick when budget comes up, and wider distribution there would also address the \"hard to find\" mentions."
+      },
+      "pr": {
+        "risk": "The engines position Good Culture as a premium brand: it leads at premium grocers, is the brand most often called \"pricey\", and loses budget and Walmart questions. Growing beyond its 11% sales share means winning general-public consumers, where store brands (32%) and Daisy (21%) are entrenched on price and reach, so the premium position may cap the market it can address.",
+        "verify": "Whether the growth case assumes a premium niche or mass-market expansion, sales velocity by channel (premium vs. mass), and the plans for price-pack options such as larger tubs and multipacks."
+      }
     },
     {
       "id": "why",
       "dim": "sources",
-      "title": "Third-Party Sources Shape the Answers",
-      "body": "The engines rely more on roundups and reviews than on the brand's own site. ChatGPT cites goodculture.com in 37% of brand answers, Gemini in 29% and Claude in 10%. Accuracy follows the same pattern: ChatGPT states the label's calories and sodium correctly in most answers, while Claude, which draws on AOL and Yahoo roundups, mostly states 80 kcal and 340 mg instead of 90 and 380. One review stands out: 67 of the 150 answers that pick Good Culture cite The Kitchn's ranking.",
-      "prospective": "With nearly half of its top picks tied to The Kitchn's ranking, a new ranking that favored a rival could shift all three engines at once. A wider spread of sources, both independent and the brand's own, would make the lead less dependent on any one of them.",
-      "existing": "Detailed, current product pages on goodculture.com, with nutrition facts and ingredients for each fat level, give the engines accurate facts to quote, as ChatGPT already does. More independent reviews beyond The Kitchn would spread the recommendation across several sources, so no single ranking carries it. The next quarterly rerun would show whether both help.",
-      "existing_h": "Widen the Evidence Base",
-      "prospective_h": "One Review Carries Much of the Lead"
+      "title": "Third-Party Sources Shape the Answers, and Facts Are Often Wrong",
+      "issue": "who controls what the AI says about Good Culture",
+      "evidence": [
+        "The engines rely more on roundups and reviews than on goodculture.com. ChatGPT cites the brand's site most and Claude least, as the chart on the right shows.",
+        "Engines that read the site state the nutrition facts correctly. Claude, drawing on AOL and Yahoo roundups, often gives slightly wrong figures, mostly 80 kcal and 340 mg against the label's 90 kcal and 380 mg.",
+        "67 of the 150 answers that pick Good Culture cite a single review, The Kitchn's ranking."
+      ],
+      "ex": {
+        "strength": "The engines draw on both goodculture.com and third-party reviews and blogs, so the brand has more than one route into the answers.",
+        "pain": "The lead leans on one review, which can make the recommendation look narrow or biased, and nutrition facts taken from third parties are sometimes wrong.",
+        "todo": "Publish a detailed, current product page on goodculture.com for each fat level, with nutrition facts and ingredients, so the engines can find and quote the right figures more easily, which also helps in retailer assistants such as Sparky and Rufus (see Finding 1). Build a wider presence in independent reviews, blogs and social media, so no single ranking carries the recommendation."
+      },
+      "pr": {
+        "risk": "Part of the lead rests on outside reviews the company does not control, so one new ranking that favors a rival could shift all three engines at once.",
+        "verify": "Who owns product data and AI-search visibility at the company, and whether anyone monitors what the engines say."
+      }
     }
   ],
   "tools": {
@@ -589,7 +623,7 @@
       [
         "Claude Haiku 5.5",
         "Second judge on all answers (κ 0.84)",
-        "Cheap cross-check, not primary since it shares Claude's maker"
+        "Cheap cross-check, kept secondary because it shares Claude's maker"
       ],
       [
         "Hand labels (49 answers)",
@@ -705,6 +739,14 @@
         [
           "Good Culture growth vs. category, SPINS data through May 2024 (Nosh)",
           "https://www.nosh.com/news/2024/active-culture-appeal-how-cottage-cheese-is-keeping-its-cool"
+        ],
+        [
+          "Sparky and Rufus results, eMarketer (Mar 2026)",
+          "https://www.emarketer.com/content/walmart-amazon-say-ai-boosts-ecommerce-sales"
+        ],
+        [
+          "What retailer assistants favor, eMarketer (Jun 2026)",
+          "https://www.emarketer.com/content/faq-on-ai-shopping-assistants--what-s-driving-adoption-how-brands-win-visibility"
         ]
       ]
     ],
@@ -815,5 +857,23 @@
       "Author-written questions",
       "All phrasings were written for this study, in US English. Real consumer wording may shift the results."
     ]
+  ],
+  "attributes": [
+    "high protein",
+    "low calorie",
+    "clean ingredients",
+    "live cultures",
+    "creamy",
+    "good taste",
+    "good texture",
+    "cheap",
+    "pricey",
+    "salty",
+    "low sodium",
+    "easy to find",
+    "hard to find",
+    "lactose-free",
+    "good for cooking",
+    "organic"
   ]
 }

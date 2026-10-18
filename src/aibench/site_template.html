@@ -109,6 +109,16 @@ blockquote footer { margin-top: 8px; font: 400 12px/1.4 var(--sans); color: var(
 .isrc { font-size: 12.5px; color: var(--accent-ink); white-space: nowrap; }
 .fsrc { font-size: 12.5px; color: var(--muted); margin: -4px 0 10px; }
 .fsrc a { color: var(--accent-ink); }
+.sv { margin: 10px 0 12px; } .sv-name { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink); margin-bottom: 3px; } .sv-name span { font: 600 12px var(--mono); color: var(--navy); }
+.sv-bar { display: flex; align-items: center; gap: 8px; height: 13px; margin: 3px 0; } .sv-fill { display: block; height: 100%; border-radius: 0 3px 3px 0; min-width: 2px; } .sv-bar b { font: 500 11.5px var(--mono); color: var(--ink-2); }
+.fissue { font-style: italic; color: var(--muted); margin: -2px 0 10px !important; max-width: none !important; }
+.fevid { margin: 0 0 10px; padding-left: 20px; color: var(--ink-2); max-width: none; } .fevid li { margin: 5px 0; }
+.views.vstack { grid-template-columns: 1fr; gap: 10px; }
+.views.vstack .view { padding: 12px 16px; }
+.vrow { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 4px 0; }
+.vrow .vk { margin: 0 !important; }
+.vrow p { max-width: none !important; }
+.view .vk { font: 600 12px var(--sans); color: var(--muted); margin: 10px 0 2px; } .view .vk:first-of-type { margin-top: 2px; }
 .fnum { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
 table.fm td.fsep { font: 600 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 10px 2px 2px; background: none; }
 .readbox { background: var(--surface); border-left: 3px solid var(--navy); padding: 18px 22px; margin: 0 0 36px; }
@@ -258,7 +268,7 @@ button.btn { font: 500 14px var(--sans); background: var(--surface); color: var(
 .flow li::before { content: counter(step); font: 400 22px/1 var(--display); color: var(--sky); }
 .flow .fs { font: 400 15px/1.25 var(--display); color: var(--navy); }
 .flow .fd { font-size: 12px; line-height: 1.45; color: var(--ink-2); }
-.sub-h { font: 400 19px/1.3 var(--display); margin: 22px 0 6px; }
+.sub-h { font: 600 16px/1.3 var(--sans); margin: 24px 0 6px; color: var(--accent) !important; }
 dl.defs { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px 14px; margin: 8px 0 14px; }
 dl.defs dt { font: 500 11px/1.9 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 dl.defs dd { margin: 0; color: var(--ink-2); }
@@ -317,6 +327,9 @@ table.deftab { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-
 table.deftab th { text-align: left; font-weight: 600; color: var(--navy); width: 26%; padding: 9px 14px 9px 0; vertical-align: top; border-bottom: 1px solid var(--line); }
 table.deftab td { padding: 9px 0; vertical-align: top; color: var(--ink-2); border-bottom: 1px solid var(--line); }
 table.deftab tr.flash td, table.deftab tr.flash th { background: #fff6d6; }
+ol.flow li.flink { cursor: pointer; } ol.flow li.flink:hover .fs { color: var(--accent); text-decoration: underline; }
+.grouphead { font: 600 13px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 56px 0 6px; padding-top: 18px; border-top: 2px solid var(--navy); }
+.grouphead + h2 { margin-top: 12px; }
 .srcg { font: 600 15px var(--sans); color: var(--navy); margin: 16px 0 6px; }
 .srclist { margin: 0 0 8px; padding-left: 22px; } .srclist li { margin: 5px 0; font-size: 14.5px; }
 table.data.tools { table-layout: fixed; min-width: 640px; }
@@ -480,7 +493,29 @@ const STATUS = {good: "Strong", warning: "Mixed", critical: "Exposed"};
 function pill(s) { return `<span class="pill ${s}"><i></i>${STATUS[s]}</span>`; }
 const M1ALL = () => ROWS.filter(r => r.m === "m1" && r.stage !== "category");
 const MINI = {
-  wins: () => { const m1 = M1ALL();
+  wins: () => { const m1 = M1ALL(), n = m1.length, ds = D.meta.dollar_share;
+    const B = ["Good Culture", "Daisy", "Private label", "Breakstone's", "Friendship", "Mulu"];
+    const d = B.map(b => ({b, men: m1.filter(r => r.b[b]).length / n, top: m1.filter(r => r.top === b).length / n, sale: D.oi_group[b] ? ds[D.oi_group[b]] : null}));
+    const W = 340, H = 250, L = 30, R = 6, T = 18, Bm = 46, gw = (W - L - R) / B.length, bw = gw * 0.25;
+    const y = v => T + (1 - v) * (H - T - Bm);
+    const SALE = "#8a99ad";
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Mention rate, top-pick share and dollar-sales share by brand">`;
+    [0, 0.5, 1].forEach(v => s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L - 5}" y="${y(v) + 4}" text-anchor="end" style="fill:var(--muted);font:10.5px var(--mono)">${v * 100}%</text>`);
+    const bar = (x0, v, fill, tip, bold) => v == null ? `<text x="${x0 + bw / 2}" y="${y(0) - 4}" text-anchor="middle" style="fill:var(--muted);font:9px var(--mono)">–</text>`
+      : `<rect x="${x0}" y="${y(v)}" width="${bw}" height="${Math.max(1, y(0) - y(v))}" rx="2" fill="${fill}" data-tip="${esc(tip)}"/><text x="${x0 + bw / 2}" y="${y(v) - 4}" text-anchor="middle" style="fill:var(--ink${bold ? "" : "-2"});font:${bold ? "600 " : ""}9.5px var(--mono)">${Math.round(v * 100)}</text>`;
+    d.forEach((x, k) => { const cx = L + gw * k + gw / 2, nm = x.b === "Private label" ? "Store brands" : x.b;
+      s += bar(cx - 1.5 * bw - 1, x.men, "var(--line-strong)", `${nm}: mentioned in ${pct(x.men)} of answers`);
+      s += bar(cx - bw / 2, x.top, color(x.b), `${nm}: top pick in ${pct(x.top)} of answers`, true);
+      s += bar(cx + bw / 2 + 1, x.sale, SALE, `${nm}: ${pct(x.sale)} of dollar sales${x.b === "Breakstone's" ? " (owner Lactalis)" : ""}`);
+      const l1 = nm === "Breakstone's" ? "Break-" : nm === "Friendship" ? "Friend-" : nm.split(" ")[0];
+      const l2 = nm === "Breakstone's" ? "stone's" : nm === "Friendship" ? "ship" : nm.split(" ").slice(1).join(" ");
+      s += `<text x="${cx}" y="${H - Bm + 16}" text-anchor="middle" style="fill:var(--ink-2);font:10px var(--sans)">${esc(l1)}</text>`;
+      if (l2) s += `<text x="${cx}" y="${H - Bm + 28}" text-anchor="middle" style="fill:var(--ink-2);font:10px var(--sans)">${esc(l2)}</text>`; });
+    s += `</svg>`;
+    return `<div class="chart-title">Mentioned, picked first and dollar-sales share (%)</div>
+      <div class="legend"><span>${swatch("var(--line-strong)")}Mentioned</span><span>${swatch("var(--accent)")}Top pick (brand color)</span><span>${swatch(SALE)}Dollar sales</span></div>${s}
+      <div class="note">Sales: Circana, 52 weeks to Feb 2026, with Breakstone's at its owner Lactalis's share. A dash means no sales share is reported.</div>`; },
+  needs: () => { const m1 = M1ALL();
     const items = Object.keys(NEEDS).map(nd => { const rs = m1.filter(r => r.need === nd), c = countBy(rs, r => r.top);
       const lead = Object.keys(c).filter(k => !["conditional", "none"].includes(k)).sort((a, b) => c[b] - c[a])[0] || "none";
       return {l: NEEDS[nd], v: (c[lead] || 0) / rs.length, c: color(lead), tip: `${NEEDS[nd]}: ${lead} is top pick in ${c[lead] || 0} of ${rs.length}`, lead}; })
@@ -491,15 +526,12 @@ const MINI = {
     return `<div class="chart-title">Pushback retention: share still recommending the brand ${mlink("pushback")}</div>` +
       retentionBars(m3, [FOCAL, "Daisy", "Private label"], [["competitor", "Named rival"], ["retailer_walmart", "Walmart (example store)"], ["price", "Tight budget"], ["protein", "Most protein"]]); },
   pillars: () => { const m1 = M1ALL(), share = (rs, b) => rs.length ? rs.filter(r => r.top === b).length / rs.length : 0;
-    const P = [["High protein", "protein", "Mulu", null], ["Simple ingredients", "clean_ingredients", "Daisy", "openai"], ["Live cultures", "live_cultures", "Nancy's", "openai"]];
+    const P = [["High protein", "protein", "Mulu", null], ["Simple ingredients", "clean_ingredients", "Daisy", "openai"], ["Live cultures (gut health)", "live_cultures", "Nancy's", "openai"]];
     const rows = P.map(([pl, nd, rv, e]) => { const src = nd === "live_cultures" ? ROWS.filter(r => (r.m === "extra" || r.m === "pilot_need") && r.need === nd) : m1;
       const rs = src.filter(r => r.need === nd && (!e || r.e === e));
       return `<tr><td class="ff">${pl}<span>${e ? ENGINES[e] + ", " : ""}${rs.length} answers</span></td><td class="fc bad"><b>${pct(share(rs, rv))}</b>${esc(rv)}</td><td class="fc ${share(rs, FOCAL) >= share(rs, rv) ? "ok" : "na"}"><b>${pct(share(rs, FOCAL))}</b>${esc(FOCAL)}</td></tr>`; }).join("");
-    const keep = [["taste_texture", "Taste & texture"], ["cooking", "Cooking"], ["neutral", "Everyday use"]].map(([nd, l]) => { const rs = m1.filter(r => r.need === nd);
-      return `<tr><td class="ff">${l}<span>all engines</span></td><td class="fc na"><b>–</b></td><td class="fc ok"><b>${pct(share(rs, FOCAL))}</b>${esc(FOCAL)}</td></tr>`; }).join("");
-    return `<div class="chart-title">Top-pick share on each selling point</div>
-      <table class="fm mini"><thead><tr><th></th><th>Challenger</th><th>${esc(FOCAL)}</th></tr></thead><tbody>${rows}
-      <tr><td colspan="3" class="fsep">Where ${esc(FOCAL)} wins outright</td></tr>${keep}</tbody></table>`; },
+    return MINI.needs() + `<div class="chart-title" style="margin-top:22px">Top-pick share on contested selling points</div>
+      <table class="fm mini"><thead><tr><th></th><th>Challenger</th><th>${esc(FOCAL)}</th></tr></thead><tbody>${rows}</tbody></table>`; },
   why: () => { const eng = Object.keys(ENGINES), fx = D.facts, lab = fx.label;
     const own = eng.map(e => { const rs = M1ALL().filter(r => r.e === e); return rs.filter(r => r.c.some(x => x[1] === "owned_focal")).length / rs.length; });
     const cell = (e, k, unit, truth) => { const x = (fx.by_engine[e] || {})[k]; if (!x || !x.n) return `<td class="fc na"><b>–</b>not stated</td>`;
@@ -514,12 +546,14 @@ const MINI = {
 const INV = {confidence: "Reason for confidence", risk: "Risk to diligence", question: "Question for management"};
 function invest(list) { return list && list.length ? `<div class="inv"><div class="inv-h">For the investment case</div>${list.map(i => `<div class="inv-row"><span class="itag ${i.type}">${INV[i.type]}</span><p>${esc(i.text)}</p></div>`).join("")}</div>` : ""; }
 function renderFindings() {
-  const view = f => `<div class="views"><div class="view own"><div class="vh">For an existing investor</div>${f.existing_h ? `<h3>${esc(f.existing_h)}</h3>` : ""}<p>${esc(f.existing)}</p></div><div class="view pro"><div class="vh">For a prospective investor</div>${f.prospective_h ? `<h3>${esc(f.prospective_h)}</h3>` : ""}<p>${esc(f.prospective)}${f.prospective_src ? ` <a class="isrc" href="${esc(f.prospective_src[1])}" target="_blank" rel="noopener">(Source: ${esc(f.prospective_src[0])})</a>` : ""}</p></div></div>`;
+  const lab = (k, x) => x ? `<div class="vrow"><div class="vk">${k}</div><p>${esc(x)}</p></div>` : "";
+  const view = f => f.ex ? `<div class="views vstack"><div class="view own"><div class="vh">For an existing investor</div>${lab("Strength", f.ex.strength)}${lab("Pain point", f.ex.pain)}${lab("What to do", f.ex.todo)}</div><div class="view pro"><div class="vh">For a prospective investor</div>${lab("Risk", f.pr.risk)}${lab("What to verify", f.pr.verify)}</div></div>` : OLDVIEW(f);
+  const OLDVIEW = f => `<div class="views"><div class="view own"><div class="vh">For an existing investor</div>${f.existing_h ? `<h3>${esc(f.existing_h)}</h3>` : ""}<p>${esc(f.existing)}</p></div><div class="view pro"><div class="vh">For a prospective investor</div>${f.prospective_h ? `<h3>${esc(f.prospective_h)}</h3>` : ""}<p>${esc(f.prospective)}${f.prospective_src ? ` <a class="isrc" href="${esc(f.prospective_src[1])}" target="_blank" rel="noopener">(Source: ${esc(f.prospective_src[0])})</a>` : ""}</p></div></div>`;
   const bt = F.bottom;
   $("#tab-findings").innerHTML = `
     <div class="kpis">${F.kpis.map(k => `<div class="kpi${k.risk ? " risk" : ""}"><div class="v">${esc(k.value)}</div><div class="l">${esc(k.label)}</div><div class="s">${esc(k.sub)}</div></div>`).join("")}</div>
     ${bt ? `${bt.verdict ? `<p class="verdict">${esc(bt.verdict)}</p>` : ""}` : ""}
-    ${F.findings.map((f, i) => `<div class="story"><div><div class="fnum">Finding ${i + 1}</div><h2>${esc(f.title)}</h2><p>${esc(f.body)}</p>${f.sources ? `<div class="fsrc">Sources: ${f.sources.map(([l, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(l)}</a>`).join(", ")}</div>` : ""}
+    ${F.findings.map((f, i) => `<div class="story"><div><div class="fnum">Finding ${i + 1}</div><h2>${esc(f.title)}</h2>${f.issue ? `<p class="fissue">Issue: ${esc(f.issue)}</p>` : ""}${f.evidence ? `<ul class="fevid">${f.evidence.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(f.body)}</p>`}${f.sources ? `<div class="fsrc">Sources: ${f.sources.map(([l, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(l)}</a>`).join(", ")}</div>` : ""}
       ${f.quote ? `<blockquote style="margin:14px 0">"${esc(f.quote.text)}"<footer>${esc(f.quote.who)}</footer></blockquote>` : ""}
       ${view(f)}<button class="linkbtn" data-dim="${f.dim}">See the data in the dashboard</button></div>
       <div>${MINI[f.id] ? MINI[f.id]() : ""}</div></div>`).join("")}
@@ -688,7 +722,7 @@ DIM_RENDER.price = () => {
   return `<div class="chart-title">Share of answers that pick ${esc(FOCAL)} as the price gap changes (${engineNote()}) ${mlink("price")}</div>
     <div class="legend"><span>${swatch(color(FOCAL))}Share picking ${esc(FOCAL)}</span><span><i class="ring-key"></i>Real shelf prices</span><span><i class="dash-key"></i>50% switch point</span></div>
     <div class="ppanels">${Object.entries(F.price_points).map(([rv, spec]) => panel(rv, spec)).join("")}</div>
-    <div class="note"><b>Line above the dashed 50% line = the AI mostly picks ${esc(FOCAL)}; below it = mostly the rival.</b> Prices are set for the test, with both name orders asked. Real Walmart shelf prices (October 2026): Good Culture $4.23, Daisy $3.97, Mulu $4.26.</div>`;
+    <div class="note"><b>Line above the dashed 50% line = the AI mostly picks ${esc(FOCAL)}. Below it = mostly the rival.</b> Prices are set for the test, with both name orders asked. Real Walmart shelf prices (October 2026): Good Culture $4.23, Daisy $3.97, Mulu $4.26.</div>`;
 };
 
 const REGION_ORDER = ["east", "south", "central", "west", "north"];
@@ -840,10 +874,13 @@ function renderMethod() {
   const src = F.engines_intro_source ? ` (<a href="${esc(F.engines_intro_source[1])}" target="_blank" rel="noopener">${esc(F.engines_intro_source[0])}</a>)` : "";
   $("#tab-method").innerHTML = `<div class="prose">
     <h2 style="margin-top:0">Study Design</h2>
-    <ol class="flow">${(F.flow || []).map(([t, d]) => `<li><span class="fs">${esc(t)}</span><span class="fd">${esc(d)}</span></li>`).join("")}</ol>
-    <p>${esc(F.engines_intro || "")}${src}</p>
+    <ol class="flow">${(F.flow || []).map(([t, d], i) => `<li${i < 5 ? ` class="flink" data-step="${i + 1}" title="Go to Step ${i + 1}"` : ""}><span class="fs">${esc(t)}</span><span class="fd">${esc(d)}</span></li>`).join("")}</ol>
 
-    ${(F.engines || []).length ? `<h2>Engine Selection</h2>
+    <h2 id="step-1">Step 1: Set Up the Study</h2>
+    <p>The study compares ${esc(FOCAL)} with six rivals, on three AI engines, across nine consumer needs, against a sales baseline.</p>
+    <h3 class="sub-h">Rival Brands</h3>
+    <table class="deftab"><tbody>${(F.rival_why || []).map(([r, w]) => `<tr><th>${esc(r)}</th><td>${esc(w)}</td></tr>`).join("")}</tbody></table>
+    ${(F.engines || []).length ? `<h3 class="sub-h">Engines</h3>
     <div class="engines">${F.engines.map(e => `<div class="engine">
       <div class="eng-head"><h3>${esc(e.app)}</h3><code>${esc(e.model)}</code></div>
       <dl><dt>Free tier</dt><dd>${esc(e.tier)}</dd><dt>Reach</dt><dd>${esc(e.share)}</dd></dl>
@@ -852,7 +889,12 @@ function renderMethod() {
       <div class="src">Source: ${e.sources.map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join(" and ")}</div></div>`).join("")}</div>
     <p class="small">Usage share and monthly users: <a href="${esc(F.engines_share_source[1])}" target="_blank" rel="noopener">${esc(F.engines_share_source[0])}</a>. ${esc(F.engines_excluded || "")}</p>` : ""}
 
-    <h2>Prompt Design</h2>
+    <h3 class="sub-h">Consumer Needs and Product Attributes</h3>
+    <p>Nine consumer needs: ${esc((A.needs || []).join(", "))}. Each brand mention is tagged with product attributes: ${esc((F.attributes || []).join(", "))}.</p>
+    <h3 class="sub-h">Sales Baseline</h3>
+    <p>Category dollar sales by brand from Circana, 52 weeks to Feb 2026, via <a href="${esc(D.meta.sales_source?.url || "#")}" target="_blank" rel="noopener">Dairy Foods</a>. AI top-pick shares are compared with these shares.</p>
+
+    <h2 id="step-2">Step 2: Build the Prompts</h2>
     <p>Two rules apply to every question:</p>
     <ul>${(A.rules || []).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
     <h3 class="sub-h">Core Prompt Grid</h3>
@@ -873,7 +915,16 @@ function renderMethod() {
         return `<tr><td><b>${esc(t)}</b></td><td>${esc(main)}${also ? `<div class="also">${esc(also[0].toUpperCase() + also.slice(1))}</div>` : ""}</td><td>${esc(why)}</td><td class="r">${n || "–"}</td></tr>`; }).join("")}</tbody></table></div>
     <p class="small">An early scan of nine one-line need questions (${counts["Need scan"] || 0} per engine) was superseded by the main grid and is kept in the data for the record.</p>
 
-    <h2>Metric Definitions</h2>
+    <h2 id="step-3">Step 3: Query the Engines</h2>
+    <p>${esc(F.engines_intro || "")}${src}</p>
+    <p>Every question was sent through each engine's API with web search on, and core-grid questions were asked twice per engine. Answers and the links they cite are cached, so a rerun only collects what is new.</p>
+
+    <h2 id="step-4">Step 4: Score the Answers</h2>
+    <p>One judge scores every conversation: <b>${esc(D.meta.judges[D.meta.primary_judge])}</b>, an open-weight model from a different company than the three engines tested. Its coding was checked in two ways:</p>
+    <p>As a second check, ${esc(second)} re-scored all ${(ja.n || 0).toLocaleString()} answers independently with the same rules. The two agree on the top pick in ${pct(ja.top_pick_agreement)} of answers (Cohen's κ = ${ja.top_pick_kappa != null ? ja.top_pick_kappa.toFixed(2) : "–"}), and brand top-pick shares differ by about one point at most. Haiku is used only as this cross-check because it is made by Anthropic, the same company as the Claude engine under test, and could favor its own family's answers.</p>
+      ${hl.n ? `<p>As a human check, ${hl.n} answers were labeled by hand, most of them cases where the two models disagree. Re-weighted to the full data, the judge's top pick is right about ${pct(hl.est_accuracy?.[D.meta.primary_judge])} of the time. The main gap: people read "X is best, or Y if you're on a budget" as a pick for X, where the judge often codes "it depends". Counting the first brand in those answers raises ${esc(FOCAL)}'s top-pick share from 46% to 51%, so the figures shown here are conservative.</p>` : ""}
+
+    <h2 id="step-5">Step 5: Calculate the Metrics</h2>
     <table class="deftab"><tbody>
       <tr id="metric-tps"><th>Top-pick share</th><td>Share of answers whose explicit recommendation is the brand. Answers that recommend different brands for different conditions ("it depends") credit no brand, which makes this a conservative count.</td></tr>
       <tr id="metric-oi"><th>Over-index</th><td>Top-pick share divided by the brand's share of category dollar sales (Circana data via <a href="${esc(D.meta.sales_source?.url || "#")}" target="_blank" rel="noopener">Dairy Foods</a>, 52 weeks to Feb 2026). Above 1x means AI recommends the brand more often than consumers buy it.</td></tr>
@@ -885,18 +936,14 @@ function renderMethod() {
       <tr id="metric-sources"><th>Source control</th><td>Share of answers citing the brand's own site, and whether the nutrition facts stated match the label.</td></tr>
     </tbody></table>
 
-    <h2>Judge Validation</h2>
-    <p>One judge scores every conversation: <b>${esc(D.meta.judges[D.meta.primary_judge])}</b>, an open-weight model from a different company than the three engines tested. Its coding was checked in two ways:</p>
-    <p>As a second check, ${esc(second)} re-scored all ${(ja.n || 0).toLocaleString()} answers independently with the same rules. The two agree on the top pick in ${pct(ja.top_pick_agreement)} of answers (Cohen's κ = ${ja.top_pick_kappa != null ? ja.top_pick_kappa.toFixed(2) : "–"}), and brand top-pick shares differ by about one point at most. Haiku is used only as this cross-check, not as the judge for the final analysis, because it is made by Anthropic, the same company as the Claude engine under test, and could favor its own family's answers.</p>
-      ${hl.n ? `<p>As a human check, ${hl.n} answers were labeled by hand, most of them cases where the two models disagree. Re-weighted to the full data, the judge's top pick is right about ${pct(hl.est_accuracy?.[D.meta.primary_judge])} of the time. The main gap: people read "X is best, or Y if you're on a budget" as a pick for X, where the judge often codes "it depends". Counting the first brand in those answers raises ${esc(FOCAL)}'s top-pick share from 46% to 51%, so the figures shown here are conservative.</p>` : ""}
-
-    <h2>Limitations</h2>
+    <div class="grouphead">Beyond This Study</div>
+    <h2 class="beyond">Limitations</h2>
     <table class="deftab"><tbody>${(F.limits || []).map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table>
     <p class="note">Outside-in only: public sources, no contact with the company, retailers or competitors. API costs (about $50) were covered by Harvard University's education plan for students.</p>
 
-    ${F.future ? `<h2>Future Work</h2><table class="deftab"><tbody>${F.future.map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table>` : ""}
-    ${F.track ? `<h2>Ongoing Monitoring</h2><p>${esc(F.track.intro)}</p><ul>${F.track.items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-    <h2>Extending to Other Brands</h2>
+    ${F.future ? `<h2 class="beyond">Future Work</h2><table class="deftab"><tbody>${F.future.map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table>` : ""}
+    ${F.track ? `<h2 class="beyond">Ongoing Monitoring</h2><p>${esc(F.track.intro)}</p><ul>${F.track.items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    <h2 class="beyond">Extending to Other Brands</h2>
     ${F.stretch ? `<p>${esc(F.stretch.intro)}</p><table class="deftab"><tbody>${F.stretch.items.map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table><p>${esc(F.stretch.outro)}</p>` : ""}
 <pre>python -m aibench.cli collect --config configs/birkenstock.yaml
 python -m aibench.cli score   --config configs/birkenstock.yaml --judge qwen
@@ -905,8 +952,10 @@ python -m aibench.cli site    --config configs/birkenstock.yaml</pre>
   { const root = $("#tab-method"), inner = root.firstElementChild, hs = [...inner.querySelectorAll("h2")];
     hs.forEach((x, k) => x.id = "msec-" + k);
     const wrap = document.createElement("div"); wrap.className = "dash";
-    wrap.innerHTML = `<nav class="sidenav" aria-label="Method sections"><div><div class="grp">Method</div>${hs.map((x, k) => `<a href="#method" data-msec="${k}">${esc(x.textContent)}</a>`).join("")}</div></nav>`;
+    const item = (x, k) => `<a href="#method" data-msec="${k}">${esc(x.textContent.replace(/^Step (\d): /, "$1  "))}</a>`;
+    wrap.innerHTML = `<nav class="sidenav" aria-label="Method sections"><div><div class="grp">Method</div>${hs.map((x, k) => x.classList.contains("beyond") ? "" : item(x, k)).join("")}</div><div><div class="grp">Beyond This Study</div>${hs.map((x, k) => x.classList.contains("beyond") ? item(x, k) : "").join("")}</div></nav>`;
     root.appendChild(wrap); wrap.appendChild(inner);
+    wrap.querySelectorAll("li.flink").forEach(li => li.addEventListener("click", () => hs.find(x => x.textContent.startsWith("Step " + li.dataset.step + ":")).scrollIntoView({behavior: "smooth", block: "start"})));
     wrap.querySelectorAll("[data-msec]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); document.getElementById("msec-" + a.dataset.msec).scrollIntoView({behavior: "smooth", block: "start"}); })); }
 }
 
