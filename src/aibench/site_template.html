@@ -313,6 +313,10 @@ table.h2h td { vertical-align: middle; }
 ul.tkey { list-style: none; padding: 0; margin: 8px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 2px 14px; font-size: 12.5px; color: var(--ink-2); }
 ul.tkey .sw { margin-right: 6px; }
 .ptools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 8px; }
+table.deftab { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 14.5px; }
+table.deftab th { text-align: left; font-weight: 600; color: var(--navy); width: 26%; padding: 9px 14px 9px 0; vertical-align: top; border-bottom: 1px solid var(--line); }
+table.deftab td { padding: 9px 0; vertical-align: top; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+table.deftab tr.flash td, table.deftab tr.flash th { background: #fff6d6; }
 .srcg { font: 600 15px var(--sans); color: var(--navy); margin: 16px 0 6px; }
 .srclist { margin: 0 0 8px; padding-left: 22px; } .srclist li { margin: 5px 0; font-size: 14.5px; }
 table.data.tools { table-layout: fixed; min-width: 640px; }
@@ -394,7 +398,7 @@ const ENGINES = D.meta.engines;                       // {openai: "ChatGPT", ...
 const FOCAL = D.meta.focal_brand;
 const NEEDS = {neutral: "General", cooking: "Cooking", taste_texture: "Taste & texture", low_calorie: "Low calorie",
   clean_ingredients: "Clean ingredients", lactose_free: "Lactose-free", protein: "Protein", value: "Value", low_sodium: "Low sodium"};
-const MODULES = {m1: "M1 need journey", m3_seeded: "M3 pushback", pilot_loyalty: "Loyalty", pilot_h2h: "Head-to-head",
+const MODULES = {m1: "Core prompt grid", m3_seeded: "Pushback", pilot_loyalty: "Loyalty", pilot_h2h: "Head-to-head",
   pilot_h2h_more: "Head-to-head", pilot_m2: "Two-step", pilot_m5: "Price", pilot_mulu_price: "Price",
   pilot_region: "Regions", pilot_need: "Need scan", extra: "Other needs"};
 const modLabel = r => r.m === "extra" ? (r.pid && r.pid in (F.retailers || {}) ? "Retailer" : "Other needs") : (MODULES[r.m] || r.m);
@@ -466,7 +470,7 @@ function pushbackFormula() {
   const m3 = ROWS.filter(r => r.m === "m3_seeded" && r.seed === FOCAL);
   const a = m3.filter(r => r.fu === "price"), b = m3.filter(r => r.fu === "placebo");
   const ka = a.filter(r => r.top === FOCAL).length, kb = b.filter(r => r.top === FOCAL).length;
-  const ex = a.length && b.length ? `<div class="small" style="margin-top:6px">Example: after recommending ${esc(FOCAL)}, the consumer asks “What if I'm on a tight budget?”. ${ka} of ${a.length} conversations still recommend ${esc(FOCAL)}, so pushback retention is <b>${pct(ka / a.length)}</b>. For reference, with no pushback (“Thanks, anything else I should know?”) it is ${pct(kb / b.length)} (${kb} of ${b.length}).</div>` : "";
+  const ex = a.length && b.length ? `<div class="small" style="margin-top:6px">Example: after recommending ${esc(FOCAL)}, the consumer asks "What if I'm on a tight budget?". ${ka} of ${a.length} conversations still recommend ${esc(FOCAL)}, so pushback retention is <b>${pct(ka / a.length)}</b>. For reference, with no pushback ("Thanks, anything else I should know?") it is ${pct(kb / b.length)} (${kb} of ${b.length}).</div>` : "";
   return `<div class="formula">Pushback retention = conversations still recommending the brand after the follow-up ÷ all conversations with that follow-up</div>${ex}
     <div class="small" style="margin-top:4px">The no-pushback level is shown as a reference line in the charts, because engines sometimes switch brands even when nothing changes (Kirkland keeps only 56% with no pushback).</div>`;
 }
@@ -516,7 +520,7 @@ function renderFindings() {
     <div class="kpis">${F.kpis.map(k => `<div class="kpi${k.risk ? " risk" : ""}"><div class="v">${esc(k.value)}</div><div class="l">${esc(k.label)}</div><div class="s">${esc(k.sub)}</div></div>`).join("")}</div>
     ${bt ? `${bt.verdict ? `<p class="verdict">${esc(bt.verdict)}</p>` : ""}` : ""}
     ${F.findings.map((f, i) => `<div class="story"><div><div class="fnum">Finding ${i + 1}</div><h2>${esc(f.title)}</h2><p>${esc(f.body)}</p>${f.sources ? `<div class="fsrc">Sources: ${f.sources.map(([l, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(l)}</a>`).join(", ")}</div>` : ""}
-      ${f.quote ? `<blockquote style="margin:14px 0">“${esc(f.quote.text)}”<footer>${esc(f.quote.who)}</footer></blockquote>` : ""}
+      ${f.quote ? `<blockquote style="margin:14px 0">"${esc(f.quote.text)}"<footer>${esc(f.quote.who)}</footer></blockquote>` : ""}
       ${view(f)}<button class="linkbtn" data-dim="${f.dim}">See the data in the dashboard</button></div>
       <div>${MINI[f.id] ? MINI[f.id]() : ""}</div></div>`).join("")}
 
@@ -559,17 +563,17 @@ DIM_RENDER.default = () => {
   const ds = D.meta.dollar_share;
   const oiRows = Object.keys(ds).filter(g => g !== "Kemps").sort((a, b) => ds[b] - ds[a]).map(g => {
     const ai = grp[g] || 0, s = ds[g];
-    return `<div class="bar pair" data-tip="${esc(g)}: ${pct(ai)} of AI top picks vs. ${pct(s)} of dollar sales = ${(ai / s).toFixed(1)}×">
+    return `<div class="bar pair" data-tip="${esc(g)}: ${pct(ai)} of AI top picks vs. ${pct(s)} of dollar sales = ${(ai / s).toFixed(1)}x">
       <span class="lab">${esc(g)}</span><span><span class="track" style="display:block"><span class="fill" style="display:block;width:${ai / 0.6 * 100}%;background:${color(g === "Lactalis" ? "Breakstone's" : g)}"></span></span>
       <span class="track" style="display:block"><span class="fill" style="display:block;width:${s / 0.6 * 100}%;background:var(--line-strong)"></span></span></span>
-      <span class="val">${(ai / s).toFixed(1)}×</span></div>`; }).join("");
+      <span class="val">${(ai / s).toFixed(1)}x</span></div>`; }).join("");
   const mention = D.brands.map(b => ({l: b, v: m1.filter(r => r.b[b]).length / n, c: color(b)})).sort((a, b) => b.v - a.v);
   const m2 = ROWS.filter(r => r.m === "pilot_m2" && byEngine(r)), m2c = countBy(m2, r => r.top);
   return `<div class="chart-title">Top pick in brand and purchase questions (${n} answers, ${engineNote()})</div>
     ${stackBar(c2, n, order)}${legend(order.filter(k => c2[k]))}${otherNames.length ? `<div class="note" style="margin-top:0">Other: ${esc(otherNames.join(", "))}.</div>` : ""}
     <div class="grid2" style="margin-top:18px">
       <div><div class="chart-title">AI top-pick share vs. dollar-sales share ${mlink("oi")}</div>
-        <div class="legend"><span>${swatch("var(--accent)")}AI top picks (brand colour)</span><span>${swatch("var(--line-strong)")}Dollar sales</span></div>
+        <div class="legend"><span>${swatch("var(--accent)")}AI top picks (brand color)</span><span>${swatch("var(--line-strong)")}Dollar sales</span></div>
         <div class="bars">${oiRows}</div><div class="note">Ratio = over-index. Lactalis = Breakstone's + Knudsen. Sales: Circana data, ${esc(D.meta.sales_source?.period || "")}, via <a href="${esc(D.meta.sales_source?.url || "#")}" target="_blank" rel="noopener">Dairy Foods (May 2026)</a>.</div></div>
       <div><div class="chart-title">Named anywhere in the answer</div><div class="note" style="margin:-4px 0 8px">Share of answers that mention the brand at least once, whether as the top pick, an alternative or a brand to avoid.</div>${bars(mention, 1)}</div>
     </div>
@@ -589,23 +593,23 @@ DIM_RENDER.needs = () => {
       const v = n ? (cc[c] || 0) / n : 0;
       const bg = `color-mix(in oklab, var(--heat-1) ${Math.round(v * 100)}%, var(--heat-0))`;
       return `<td class="cell" tabindex="0" role="button" data-need="${nd}" data-top="${c}" style="background:${bg};color:${v > .45 ? "#fff" : "var(--ink)"}"
-        data-tip="${esc(NEEDS[nd])} · ${esc(label(c))}: ${cc[c] || 0} of ${n}. Click to read them.">${v ? pct(v) : "·"}</td>`; }).join("")}<td class="ncell">${n}</td></tr>`;
+        data-tip="${esc(NEEDS[nd])}, ${esc(label(c))}: ${cc[c] || 0} of ${n}. Click to read them.">${v ? pct(v) : "·"}</td>`; }).join("")}<td class="ncell">${n}</td></tr>`;
   }).join("");
-  return `<div class="chart-title">Top-pick share by consumer need (${engineNote()}) · click a cell to read the answers</div>
+  return `<div class="chart-title">Top-pick share by consumer need (${engineNote()}). Click a cell to read the answers.</div>
     <div class="scroll-x"><table class="heat"><colgroup><col class="c-need">${cols.map(() => "<col>").join("")}<col class="c-ans"></colgroup><thead>${head}</thead><tbody>${body}</tbody></table></div>
-    <div class="note">Each need has 6 brand- and purchase-stage questions × 2 repeats per engine. Category-stage questions ("Is cottage cheese healthy?") are excluded because they rarely name a brand.</div>`;
+    <div class="note">Each need has 6 brand- and purchase-stage questions, each asked twice per engine. Category-stage questions ("Is cottage cheese healthy?") are excluded because they rarely name a brand.</div>`;
 };
 function bindCells() {
   document.querySelectorAll("#dim-needs .cell").forEach(td => {
-    const open = () => openDrawer(`${NEEDS[td.dataset.need]} → ${label(td.dataset.top)}`,
+    const open = () => openDrawer(`${NEEDS[td.dataset.need]}: ${label(td.dataset.top)}`,
       ROWS.filter(r => r.m === "m1" && r.stage !== "category" && byEngine(r) && r.need === td.dataset.need && r.top === td.dataset.top));
     td.addEventListener("click", open); td.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
   });
 }
 
-const FU = [["Control", [["placebo", "“Thanks, anything else?” (no pushback)"], ["competitor", "“Would you still pick it over [rival]?”"]]],
-  ["Preference shift", [["price", "“What if I'm on a tight budget?”"], ["protein", "“I want the most protein possible.”"], ["taste", "“What if texture matters most?”"]]],
-  ["Distribution", [["retailer_walmart", "“I shop at Walmart”"], ["retailer_costco", "“I shop at Costco”"], ["retailer_kroger", "“I shop at Kroger”"], ["region", "“I live in [region]” (5 regions)"]]]];
+const FU = [["Control", [["placebo", "\"Thanks, anything else?\" (no pushback)"], ["competitor", "\"Would you still pick it over [rival]?\""]]],
+  ["Preference shift", [["price", "\"What if I'm on a tight budget?\""], ["protein", "\"I want the most protein possible.\""], ["taste", "\"What if texture matters most?\""]]],
+  ["Distribution", [["retailer_walmart", "\"I shop at Walmart\""], ["retailer_costco", "\"I shop at Costco\""], ["retailer_kroger", "\"I shop at Kroger\""], ["region", "\"I live in [region]\" (5 regions)"]]]];
 DIM_RENDER.pushback = () => {
   const m3 = ROWS.filter(r => r.m === "m3_seeded" && byEngine(r)).map(r => ({...r, fu2: r.fu.startsWith("region") ? "region" : r.fu}));
   const seeds = [...new Set(m3.map(r => r.seed))].sort((a, b) => a === FOCAL ? -1 : b === FOCAL ? 1 : a.localeCompare(b));
@@ -617,7 +621,7 @@ DIM_RENDER.pushback = () => {
   return `<div class="chart-title">Pushback retention: share of conversations still recommending the brand after one follow-up (${engineNote()}) ${mlink("pushback")}</div>
     ${FU.map(([g, items]) => `<div class="grouplab">${g}</div>` + retentionBars(m3, seeds, items).replace(/^<div class="legend">.*?<\/div>/, g === FU[0][0] ? "$&" : "").replace(/<div class="rscale">.*$/s, "")).join("")}
     <div class="rscale"><span></span><div><span>0%</span><span>50%</span><span>100%</span></div></div>
-    <div class="note"><b>Longer bar = the AI sticks with its original brand choice more often.</b> The thin line on each bar marks that brand's retention with no pushback. Turn 1 is fixed and identical for every brand (“I'd recommend X. It's a solid choice.”), and only the follow-up is sent to the engine.</div>
+    <div class="note"><b>Longer bar = the AI sticks with its original brand choice more often.</b> The thin line on each bar marks that brand's retention with no pushback. Turn 1 is fixed and identical for every brand ("I'd recommend X. It's a solid choice."), and only the follow-up is sent to the engine.</div>
     <div style="margin-top:24px"><div class="chart-title">Where ${esc(FOCAL)}'s recommendation goes after the follow-up</div>${legend(destKeys)}
       <div class="scroll-x"><table class="data dest"><colgroup><col style="width:290px"><col><col style="width:80px"></colgroup>
       <thead><tr><th>Follow-up</th><th>Brand recommended after the follow-up</th><th class="r">Answers</th></tr></thead><tbody>${dest}</tbody></table></div></div>`;
@@ -626,7 +630,7 @@ DIM_RENDER.pushback = () => {
 DIM_RENDER.loyalty = () => {
   const lo = ROWS.filter(r => r.m === "pilot_loyalty" && byEngine(r));
   const brands = [...new Set(lo.map(r => r.held))].sort((a, b) => a === FOCAL ? -1 : b === FOCAL ? 1 : 0);
-  const conds = [["baseline", "“I usually buy X. Should I stick with it?”"], ["price", "…but I'm on a tight budget"], ["protein", "…but I want more protein"], ["walmart", "…but I shop at Walmart"]];
+  const conds = [["baseline", "\"I usually buy X. Should I stick with it?\""], ["price", "...but I'm on a tight budget"], ["protein", "...but I want more protein"], ["walmart", "...but I shop at Walmart"]];
   const VC = {stay: "var(--stay)", mixed: "var(--mixed)", switch: "var(--switch)"};
   const cell = rs => { const c = countBy(rs, r => r.verdict), n = rs.length;
     return `<div class="stack" style="height:18px">${["stay", "mixed", "switch"].filter(k => c[k]).map(k => `<div style="width:${c[k] / n * 100}%;background:${VC[k]}" data-tip="${k}: ${c[k]} of ${n}"></div>`).join("")}</div>
@@ -651,10 +655,10 @@ DIM_RENDER.h2h = () => {
     return `<tr><td>${label}</td><td><div class="stack">${seg.filter(x => x[0]).map(x => `<div style="width:${x[0] / n * 100}%;background:${x[1]}" data-tip="${esc(x[2])}: ${x[0]} of ${n}"></div>`).join("")}</div></td>
       <td class="r num">${pct(w / n)}</td><td class="r num">${pct(dep / n)}</td><td class="r num">${pct(l / n)}</td></tr>`; }).join("");
   const first = h.filter(r => r.order === "gc_first"), second = h.filter(r => r.order !== "gc_first");
-  return `<div class="legend"><span>${swatch(color(FOCAL))}${esc(FOCAL)} wins</span><span>${swatch("var(--cond)")}It depends (no single winner: the AI says each brand suits different needs)</span><span>${swatch("var(--other)")}Rival wins (shown in the rival's colour)</span></div>
+  return `<div class="legend"><span>${swatch(color(FOCAL))}${esc(FOCAL)} wins</span><span>${swatch("var(--cond)")}It depends (no single winner: the AI says each brand suits different needs)</span><span>${swatch("var(--other)")}Rival wins (shown in the rival's color)</span></div>
     <div class="scroll-x"><table class="data h2h"><colgroup><col style="width:250px"><col><col style="width:110px"><col style="width:90px"><col style="width:90px"></colgroup>
     <thead><tr><th>${esc(FOCAL)} vs.</th><th></th><th class="r">Good Culture wins</th><th class="r">It depends</th><th class="r">Rival wins</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <div class="note"><b>Longer blue bar = Good Culture wins outright more often.</b> “Which is better, A or B cottage cheese?”, asked in both name orders. Name order barely matters: ${esc(FOCAL)} wins ${pct(first.filter(r => r.top === FOCAL).length / (first.length || 1))} of answers when named first and ${pct(second.filter(r => r.top === FOCAL).length / (second.length || 1))} when named second.</div>`;
+    <div class="note"><b>Longer blue bar = Good Culture wins outright more often.</b> "Which is better, A or B cottage cheese?", asked in both name orders. Name order barely matters: ${esc(FOCAL)} wins ${pct(first.filter(r => r.top === FOCAL).length / (first.length || 1))} of answers when named first and ${pct(second.filter(r => r.top === FOCAL).length / (second.length || 1))} when named second.</div>`;
 };
 
 DIM_RENDER.price = () => {
@@ -673,7 +677,7 @@ DIM_RENDER.price = () => {
     g += `<polyline fill="none" stroke="${color(FOCAL)}" stroke-width="2.5" points="${pts.map(d => `${sx(d.x)},${sy(d.y)}`).join(" ")}"/>`;
     pts.forEach((d, i) => {
       if (d.real) g += `<circle cx="${sx(d.x)}" cy="${sy(d.y)}" r="10" fill="none" stroke="${color(FOCAL)}" stroke-width="2"/>`;
-      g += `<circle cx="${sx(d.x)}" cy="${sy(d.y)}" r="5.5" fill="${color(FOCAL)}" stroke="var(--surface)" stroke-width="2" data-tip="${esc(d.label)} ($${d.x.toFixed(2)}): ${d.k} of ${d.n} answers pick ${esc(FOCAL)}${d.real ? " · real shelf prices" : ""}"/>`;
+      g += `<circle cx="${sx(d.x)}" cy="${sy(d.y)}" r="5.5" fill="${color(FOCAL)}" stroke="var(--surface)" stroke-width="2" data-tip="${esc(d.label)} ($${d.x.toFixed(2)}): ${d.k} of ${d.n} answers pick ${esc(FOCAL)}${d.real ? ", real shelf prices" : ""}"/>`;
       const above = d.y < .85;
       g += `<text x="${sx(d.x)}" y="${sy(d.y) + (above ? -14 : 20)}" text-anchor="middle" style="fill:var(--ink);font:500 11.5px var(--mono)">${pct(d.y)}</text>`;
       g += `<text x="${sx(d.x)}" y="${H - B + 18}" text-anchor="middle">$${d.x.toFixed(2)}</text>`;
@@ -701,15 +705,15 @@ DIM_RENDER.channel = () => {
   const leadFor = need => Object.fromEntries(REGION_ORDER.map(rg => { const rs = reg.filter(r => r.region === rg && r.need === need), c = countBy(rs, r => r.top);
     const brand = Object.keys(c).filter(k => !["conditional", "none"].includes(k)).sort((a, b) => c[b] - c[a])[0];
     return [rg, {brand, k: brand ? c[brand] : 0, n: rs.length, share: brand && rs.length ? c[brand] / rs.length : 0}]; }));
-  return `<div class="chart-title">“What's the best cottage cheese to buy at [store]?” (${engineNote()}) ${mlink("tps")}</div>
+  return `<div class="chart-title">"What's the best cottage cheese to buy at [store]?" (${engineNote()}) ${mlink("tps")}</div>
     <div class="scards">${cards}</div>${legend(keys)}
-    <div class="note"><b>Big number = share of answers that pick ${esc(FOCAL)} in that store.</b> The card's top edge shows the leading brand's colour.</div>
-    <div class="chart-title" style="margin-top:22px">“I live in [region]…”: leading brand by region (${engineNote()})</div>
+    <div class="note"><b>Big number = share of answers that pick ${esc(FOCAL)} in that store.</b> The card's top edge shows the leading brand's color.</div>
+    <div class="chart-title" style="margin-top:22px">"I live in [region]...": leading brand by region (${engineNote()})</div>
     <div class="scards">${REGION_ORDER.map(rg => { const g = leadFor("neutral")[rg];
       const line = (lab, L) => `<div class="rline"><span class="rq">${lab}</span>${L && L.brand ? `${swatch(color(L.brand))}<b>${esc(label(L.brand))}</b> <span class="small">${L.k}/${L.n}</span>` : `<span class="small">no clear pick</span>`}</div>`;
       return `<div class="scard" style="border-top-color:${g && g.brand ? color(g.brand) : "var(--line-strong)"}"><div class="sname">${esc((F.region_names || {})[rg] || rg)}</div>
         ${line("Leading brand", g)}</div>`; }).join("")}</div>
-    <div class="note"><b>Each card shows the brand the AI picks most often when the consumer names that region</b> (“I live in [region]. What cottage cheese should I buy?”). The card's top edge shows the leader's colour.</div>`;
+    <div class="note"><b>Each card shows the brand the AI picks most often when the consumer names that region</b> ("I live in [region]. What cottage cheese should I buy?"). The card's top edge shows the leader's color.</div>`;
 };
 
 const TAGS = [["pricey", "Called pricey"], ["cheap", "Called cheap"], ["high protein", "High protein"], ["clean ingredients", "Clean ingredients"],
@@ -769,7 +773,7 @@ DIM_RENDER.sources = () => {
       const v = x.match_label / x.n, vals = Object.entries(x.values).sort((p, q) => q[1] - p[1]), top1 = vals[0];
       const tie = vals.filter(y => y[1] === top1[1]).map(y => y[0]);
       const sub = v >= 0.5 ? "right" : tie.length > 1 ? tie.sort((p, q) => p - q).join(" or ") + unit : "says " + top1[0] + unit;
-      return `<td class="fc ${v >= 0.5 ? "ok" : "bad"}" data-tip="${esc(nm)}: ${x.match_label} of ${x.n} figures match the label (${truth}${unit}). Stated values: ${esc(vals.map(([vv, c]) => vv + unit + " ×" + c).join(", "))}"><b>${pct(v)}</b>${esc(sub)}</td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
+      return `<td class="fc ${v >= 0.5 ? "ok" : "bad"}" data-tip="${esc(nm)}: ${x.match_label} of ${x.n} figures match the label (${truth}${unit}). Stated values: ${esc(vals.map(([vv, c]) => vv + unit + " x" + c).join(", "))}"><b>${pct(v)}</b>${esc(sub)}</td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
   return `<div class="chart-title">Where each engine's citations come from (${engineNote()})</div><div class="legend">${SRC.map(x => `<span>${swatch(x[2])}${esc(x[1])}</span>`).join("")}</div>
     <div class="scroll-x"><table class="data srcmix"><colgroup><col style="width:120px"><col><col style="width:170px"></colgroup>
       <thead><tr><th>Engine</th><th>Share of all citations, by source type</th><th class="r">Brand questions citing goodculture.com</th></tr></thead><tbody>${mix}</tbody></table></div>
@@ -777,7 +781,7 @@ DIM_RENDER.sources = () => {
     <div class="grid2" style="margin-top:22px">
       <div><div class="chart-title">Most-cited sites, by engine (${engineNote()})</div>${heat}<div class="note"><b>Darker cell = the engine cites the site more often.</b> The square beside each site shows its source type.</div></div>
       <div><div class="chart-title">Does the AI state ${esc(FOCAL)}'s nutrition facts correctly?</div>${facts}
-        <div class="note"><b>Green = most stated figures match the label. Red = most are wrong, with the value most often given.</b> Label: ${esc(lab.product)}, per ½ cup. Good Culture sells several fat levels, so some mismatches may describe another product.</div></div>
+        <div class="note"><b>Green = most stated figures match the label. Red = most are wrong, with the value most often given.</b> Label: ${esc(lab.product)}, per 1/2 cup. Good Culture sells several fat levels, so some mismatches may describe another product.</div></div>
     </div>`;
 };
 
@@ -793,7 +797,7 @@ function openDrawer(title, rows) {
   closeDrawer();
   const bg = document.createElement("div"); bg.className = "drawer-bg"; bg.addEventListener("click", closeDrawer);
   const dr = document.createElement("div"); dr.className = "drawer"; dr.setAttribute("role", "dialog"); dr.setAttribute("aria-modal", "true");
-  dr.innerHTML = `<div class="drawer-head"><div><div class="eyebrow">${rows.length} answers · ${esc(engineNote())}</div><h2>${esc(title)}</h2></div><button class="btn" id="dclose">Close</button></div>
+  dr.innerHTML = `<div class="drawer-head"><div><div class="eyebrow">${rows.length} answers, ${esc(engineNote())}</div><h2>${esc(title)}</h2></div><button class="btn" id="dclose">Close</button></div>
     <div class="alist">${rows.map(card).join("") || `<p class="small">No answers.</p>`}</div>`;
   document.body.append(bg, dr); $("#dclose").addEventListener("click", closeDrawer); $("#dclose").focus();
 }
@@ -860,42 +864,40 @@ function renderMethod() {
     </dl>
     ${A.example_grid ? `<p class="small" style="margin-bottom:6px">The nine questions for one need (${esc(A.example_need)}):</p>
     <div class="scroll-x"><table class="data grid-ex"><thead><tr><th></th>${A.phrasings.map(([k]) => `<th>${esc(k)}</th>`).join("")}</tr></thead>
-      <tbody>${A.example_grid.map((row, i) => `<tr><th>${esc(A.stages[i][0])}</th>${row.map(q => `<td>“${esc(q)}”</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      <tbody>${A.example_grid.map((row, i) => `<tr><th>${esc(A.stages[i][0])}</th>${row.map(q => `<td>"${esc(q)}"</td>`).join("")}</tr>`).join("")}</tbody></table></div>
     <p class="small">${esc(A.grid_note)}</p>` : ""}
     <h3 class="sub-h">Supplementary Tests</h3>
     <div class="scroll-x"><table class="data"><thead><tr><th>Test</th><th>Example</th><th>What it shows</th><th class="r">Asked per engine</th></tr></thead>
-      <tbody>${(A.tests || []).map(([t, ex, why]) => { const n = t === "Pushback" ? counts["M3 pushback"] : counts[t];
+      <tbody>${(A.tests || []).map(([t, ex, why]) => { const n = counts[t];
         const m = ex.match(/^(.*?)\s*\((also [^)]*)\)\s*$/); const main = m ? m[1] : ex, also = m ? m[2] : "";
         return `<tr><td><b>${esc(t)}</b></td><td>${esc(main)}${also ? `<div class="also">${esc(also[0].toUpperCase() + also.slice(1))}</div>` : ""}</td><td>${esc(why)}</td><td class="r">${n || "–"}</td></tr>`; }).join("")}</tbody></table></div>
     <p class="small">An early scan of nine one-line need questions (${counts["Need scan"] || 0} per engine) was superseded by the main grid and is kept in the data for the record.</p>
 
     <h2>Metric Definitions</h2>
-    <ul>
-      <li id="metric-tps"><b>Top-pick share</b>: share of answers whose explicit recommendation is the brand. Answers that recommend different brands for different conditions (“it depends”) credit no brand, which makes this a conservative count.</li>
-      <li id="metric-oi"><b>Over-index</b>: top-pick share divided by the brand's share of category dollar sales (Circana data via <a href="${esc(D.meta.sales_source?.url || "#")}" target="_blank" rel="noopener">Dairy Foods</a>, 52 weeks to Feb 2026). Above 1× means AI recommends the brand more often than consumers buy it.</li>
-      <li id="metric-pushback"><b>Pushback retention</b>: whether a recommendation survives one follow-up user question prompt.${pushbackFormula()}</li>
-      <li id="metric-loyalty"><b>Loyalty stay rate</b>: share of answers that advise a consumer to stay with the brand they say they usually buy (“I usually buy X. Should I stick with it?”), with and without a pressure such as a tight budget. Answers that give both options without a lean count as mixed.</li>
-      <li id="metric-price"><b>Price headroom</b>: in a two-tub choice, the share of answers picking the brand at each price gap. The switch point is where that share falls below 50%.</li>
-      <li id="metric-h2h"><b>Head-to-head</b>: wins, “it depends”, and losses when two brands are named.</li>
-      <li id="metric-perception"><b>Perception</b>: how each mention of a brand reads, scored by the judge model (Qwen) on a five-point scale. +2 is strongly positive (praised or recommended outright), +1 mildly positive, 0 neutral (named without judgement), −1 mildly negative (mostly drawbacks) and −2 strongly negative (advised against). Each mention also gets attribute tags such as “pricey” or “high protein”.</li>
-      <li id="metric-sources"><b>Source control</b>: share of answers citing the brand's own site, and whether the nutrition facts stated match the label.</li>
-    </ul>
+    <table class="deftab"><tbody>
+      <tr id="metric-tps"><th>Top-pick share</th><td>Share of answers whose explicit recommendation is the brand. Answers that recommend different brands for different conditions ("it depends") credit no brand, which makes this a conservative count.</td></tr>
+      <tr id="metric-oi"><th>Over-index</th><td>Top-pick share divided by the brand's share of category dollar sales (Circana data via <a href="${esc(D.meta.sales_source?.url || "#")}" target="_blank" rel="noopener">Dairy Foods</a>, 52 weeks to Feb 2026). Above 1x means AI recommends the brand more often than consumers buy it.</td></tr>
+      <tr id="metric-pushback"><th>Pushback retention</th><td>Whether a recommendation survives one follow-up user question prompt.${pushbackFormula()}</td></tr>
+      <tr id="metric-loyalty"><th>Loyalty stay rate</th><td>Share of answers that advise a consumer to stay with the brand they say they usually buy ("I usually buy X. Should I stick with it?"), with and without a pressure such as a tight budget. Answers that give both options without a lean count as mixed.</td></tr>
+      <tr id="metric-price"><th>Price headroom</th><td>In a two-tub choice, the share of answers picking the brand at each price gap. The switch point is where that share falls below 50%.</td></tr>
+      <tr id="metric-h2h"><th>Head-to-head</th><td>Wins, "it depends", and losses when two brands are named.</td></tr>
+      <tr id="metric-perception"><th>Perception</th><td>How each mention of a brand reads, scored by the judge model (Qwen) on a five-point scale. +2 is strongly positive (praised or recommended outright), +1 mildly positive, 0 neutral (named without judgment), −1 mildly negative (mostly drawbacks) and −2 strongly negative (advised against). Each mention also gets attribute tags such as "pricey" or "high protein".</td></tr>
+      <tr id="metric-sources"><th>Source control</th><td>Share of answers citing the brand's own site, and whether the nutrition facts stated match the label.</td></tr>
+    </tbody></table>
 
     <h2>Judge Validation</h2>
     <p>One judge scores every conversation: <b>${esc(D.meta.judges[D.meta.primary_judge])}</b>, an open-weight model from a different company than the three engines tested. Its coding was checked in two ways:</p>
-    <ul>
-      <li><b>A second model:</b> ${esc(second)} re-scored all ${(ja.n || 0).toLocaleString()} answers independently with the same rules. The two agree on the top pick in ${pct(ja.top_pick_agreement)} of answers (Cohen's κ = ${ja.top_pick_kappa != null ? ja.top_pick_kappa.toFixed(2) : "–"}), and brand top-pick shares differ by about one point at most. Haiku serves only as this cross-check, not as the judge for the final analysis, because it is made by Anthropic, the same company as the Claude engine under test, and could favour its own family's answers.</li>
-      ${hl.n ? `<li><b>Hand labels:</b> ${hl.n} answers were labelled by hand, most of them cases where the two models disagree. Re-weighted to the full data, the judge's top pick is right about ${pct(hl.est_accuracy?.[D.meta.primary_judge])} of the time. The main gap: people read “X is best, or Y if you're on a budget” as a pick for X, where the judge often codes “it depends”. Counting the first brand in those answers raises ${esc(FOCAL)}'s top-pick share from 46% to 51%, so the figures shown here are conservative.</li>` : ""}
-    </ul>
+    <p>As a second check, ${esc(second)} re-scored all ${(ja.n || 0).toLocaleString()} answers independently with the same rules. The two agree on the top pick in ${pct(ja.top_pick_agreement)} of answers (Cohen's κ = ${ja.top_pick_kappa != null ? ja.top_pick_kappa.toFixed(2) : "–"}), and brand top-pick shares differ by about one point at most. Haiku is used only as this cross-check, not as the judge for the final analysis, because it is made by Anthropic, the same company as the Claude engine under test, and could favor its own family's answers.</p>
+      ${hl.n ? `<p>As a human check, ${hl.n} answers were labeled by hand, most of them cases where the two models disagree. Re-weighted to the full data, the judge's top pick is right about ${pct(hl.est_accuracy?.[D.meta.primary_judge])} of the time. The main gap: people read "X is best, or Y if you're on a budget" as a pick for X, where the judge often codes "it depends". Counting the first brand in those answers raises ${esc(FOCAL)}'s top-pick share from 46% to 51%, so the figures shown here are conservative.</p>` : ""}
 
     <h2>Limitations</h2>
-    <ul>${(F.limits || []).map(([t, x]) => `<li><b>${esc(t)}</b>: ${esc(x)}</li>`).join("")}</ul>
+    <table class="deftab"><tbody>${(F.limits || []).map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table>
     <p class="note">Outside-in only: public sources, no contact with the company, retailers or competitors. API costs (about $50) were covered by Harvard University's education plan for students.</p>
 
-    ${F.future ? `<h2>Future Work</h2><ul>${F.future.map(([t, x]) => `<li><b>${esc(t)}</b>: ${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${F.future ? `<h2>Future Work</h2><table class="deftab"><tbody>${F.future.map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table>` : ""}
     ${F.track ? `<h2>Ongoing Monitoring</h2><p>${esc(F.track.intro)}</p><ul>${F.track.items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     <h2>Extending to Other Brands</h2>
-    ${F.stretch ? `<p>${esc(F.stretch.intro)}</p><ul>${F.stretch.items.map(([t, x]) => `<li><b>${esc(t)}</b>: ${esc(x)}</li>`).join("")}</ul><p>${esc(F.stretch.outro)}</p>` : ""}
+    ${F.stretch ? `<p>${esc(F.stretch.intro)}</p><table class="deftab"><tbody>${F.stretch.items.map(([t, x]) => `<tr><th>${esc(t)}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table><p>${esc(F.stretch.outro)}</p>` : ""}
 <pre>python -m aibench.cli collect --config configs/birkenstock.yaml
 python -m aibench.cli score   --config configs/birkenstock.yaml --judge qwen
 python -m aibench.cli site    --config configs/birkenstock.yaml</pre>
